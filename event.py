@@ -49,7 +49,7 @@ class Event(Item):
 		event_schema = {
 			"name": self.name,
 			"model": {
-				"concepts": self.model.model,
+				"concepts": self.model.graph,
 				"maturity": self.model.maturity
 			},
 			"description": self.description,

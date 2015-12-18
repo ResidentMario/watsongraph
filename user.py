@@ -92,7 +92,7 @@ class User():
 		user_schema = {
 			"password": self.password,
 			"model": {
-				"concepts": self.model.model,
+				"concepts": self.model.graph,
 				"maturity": self.model.maturity
 			},
 			"email": self.email,
