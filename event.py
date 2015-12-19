@@ -85,4 +85,4 @@ class Event(Item):
 					json.dump(data, outfile, indent=4)
 
 	def deleteEvent(self, filename="events.json"):
-		self.deleteItem(filename)
+		self.delete_item(filename)

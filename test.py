@@ -1,17 +1,7 @@
-from concept import Concept
-from conceptmodel import ConceptModel
-import event_insight_lib
+from item import Item
 
-ibm = Concept('IBM')
-# microsoft = ConceptModel(['Microsoft'])
-
-ibm_graph = ConceptModel(['IBM', 'Microsoft'])
-# ibm_graph.print_edges()
-# ibm_graph.print_nodes()
-ibm_graph.visualize()
-# ibm_graph.graph = ibm.get_related_concepts_graph(simple=True)
-
-# a = Concept('Pineapple')
-# related_concepts_raw = event_insight_lib.get_related_concepts(a.label)
-# print(related_concepts_raw)
-# print(a)
+i = Item('Test', 'The Corpora endpoint allows users to upload their own set of documents into Concept Insights, while organizing them into collections. The raw documents are processed by our system, and automatically annotated and indexed. The analysis and indexing of documents becomes automatically accessible through query methods of this endpoint.')
+i.model.print_nodes()
+i2 = Item('Test2', 'Then, one of the guys from plotly reached out saying I should take a look. I took a brief glance '
+                   'and realised that this was nothing like a new matplotlib and in fact looked pretty cool. So I dutifully put it on my to do list but very much near the bottom.')
+print(i.compare_to(i2))

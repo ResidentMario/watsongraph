@@ -1,7 +1,5 @@
-# noinspection PyUnresolvedReferences
 from mwviews.api import PageviewsClient
 import event_insight_lib
-# noinspection PyUnresolvedReferences
 import networkx as nx
 
 
@@ -38,23 +36,33 @@ class Concept:
     """
     view_count = 0
 
-    def __init__(self, label, simple=False):
+    """
+    A measure of the strength of the concept. Used at the User level for tracking the evolution of a concept's
+    relevance over time.
+    """
+    relevance = 0.0
+
+    def __init__(self, label):
         """
         :param label: The node label used to initialize the concept.
-        :param simple: Set to "False" by default, which causes this method to populate the view_count parameter.
-        Set this flag to True for a speed bump if you don't need view counting.
         """
         self.node = "/graphs/wikipedia/en-20120601/concepts/" + label.replace(' ', '_')
         self.label = label
-        self.name = label[:label.find("(") - 1]
+        if "(" in self.label:
+            self.name = label[:label.find("(")]
+        else:
+            self.name = label
         # Retrieve and parse article page views. Take the daily average of the number of views over the last 30 days.
-        if not simple:
-            self.get_view_count()
+        self.set_view_count()
 
     def __str__(self):
-        return "<Concept: '" + self.label + "'>"
+        """
+        Morphs the string representation of the Concept into its label. Used by the conceptmodel.visualize() plotter.
+        :return: The Concept's name string.
+        """
+        return self.name
 
-    def get_view_count(self):
+    def set_view_count(self):
         """
         Sets the view_count parameter appropriately, using a 30-day average.
         """
@@ -63,27 +71,34 @@ class Concept:
         p = int(sum([daily_view_count for daily_view_count in p if daily_view_count])/len(p))
         self.view_count = p
 
-    def get_related_concepts_graph(self, level=0, limit=10, simple=False):
+    def set_relevance(self, relevance):
+        """
+        :param relevance: Sets the concept's relevance parameter.
+        """
+        self.relevance = relevance
+
+    def expand(self, level=0, limit=10):
         """
         Returns a networkx (nx) directed graph (anchored tree) of concepts related to the current one, suitable for
-        assignment to a ConceptModel object.
+        assignment to a ConceptModel object. Note that what this function returns is *not* a ConceptModel object
+        itself! Just an nx graph that can be assigned to one!
+
+        The action of mining a concept and then linking it to a pre-existing graph is known as "expanding" it,
+        a terminology used throughout this library.
 
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
         parameter is a parameter that is passed directly to the IBM Watson API call.
         :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
         directly to the IBM Watson API call.
-        :param simple -- Set to "False" by default, which causes this method to populate the view_count parameters
-        of all of the discovered related Concept objects. This procedure is very slow, however, because it
-        requires making up to `limit` sequential calls against the Wikipedia API. So set this flag to True for a
-        significant speed bump if you don't need view counting.
-        :return: Returns a ConceptModel of related concepts (an anchored tree).
+        :return: Returns a ConceptModel of related concepts (an anchored tree). Note that this is *not* a
+        ConceptModel object itself! Just an nx graph that can be assigned to one!
         """
-        rel_graph = nx.Graph(simple=simple)
-        related_concepts_raw = event_insight_lib.get_related_concepts(self.label)
+        rel_graph = nx.Graph()
+        related_concepts_raw = event_insight_lib.get_related_concepts(self.label, level=level, limit=limit)
         for raw_concept in related_concepts_raw['concepts']:
             # Remove the `A-A` edge returned by the raw `get_related_concepts` class.
             if raw_concept['concept']['label'] != self.label:
-                new_node = Concept(raw_concept['concept']['label'], simple=simple)
+                new_node = Concept(raw_concept['concept']['label'])
                 rel_graph.add_edge(self, new_node, weight=raw_concept['score'])
         return rel_graph

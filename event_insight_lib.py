@@ -116,6 +116,7 @@ def annotate_text(text, content_type='text/plain', tokenfile='token.json'):
     return json.loads(r.text)
 
 
+# noinspection PyUnresolvedReferences
 def get_related_concepts(label, level=0, limit=10, tokenfile='token.json'):
     """
     Given the name of a concept within the Wikipedia concept graph, returns the result of an API call to the
