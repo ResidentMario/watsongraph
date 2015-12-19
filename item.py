@@ -1,6 +1,7 @@
 from conceptmodel import ConceptModel
-import os
-import json
+from concept import Concept
+# import os
+# import json
 import event_insight_lib
 
 # Every augmentation is the ConceptModel of a new user-indicated Item of interest. I have to come up with some sort
@@ -8,6 +9,8 @@ import event_insight_lib
 # the overlap.
 # Idea: every iteration the existing non-overlapping nodes lose 1/10 of their current relevance. Newly added nodes
 # come in at high relevance (.9?). Overlapping elements gain half of the distance between their sum and 1.
+
+# TODO: compare() method for measuring the overlap between two items.
 
 
 class Item:
@@ -29,27 +32,7 @@ class Item:
         related_concepts_raw = event_insight_lib.annotate_text(self.description)
         new_labels = [raw_concept['concept']['label'] for raw_concept in related_concepts_raw['annotations']]
         for label in new_labels:
-            self.model.augment(label)
-
-    # TODO: Rewrite.
-    def delete_item(self, filename="items.json"):
-        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-            raise IOError('Error: events file ' + filename + ' not found.')
-        else:
-            data = json.load(open(filename))
-            event_index = 0
-            for i in range(0, len(data['events'])):
-                if data['events'][i]['name'] == self.name:
-                    events_index = i
-                    break
-            data['events'].pop(event_index)
-            with open(filename, 'w') as outfile:
-                json.dump(data, outfile, indent=4)
-
-    # TODO: Rewrite.
-    def compare_to(self, other_item):
-        """
-        Compares two Items and returns a measure of average overlap (a mock correlation).
-        :param other_item: The other Item to be merged into the current one.
-        """
-        pass
+            self.model.add(Concept(label))
+        # Set the relevance parameters of the underlying Concepts to 1.0 to start off with.
+        for concept in self.model.concepts():
+            concept.relevance = 1

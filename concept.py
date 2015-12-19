@@ -1,6 +1,6 @@
 from mwviews.api import PageviewsClient
+import hashlib
 import event_insight_lib
-import networkx as nx
 
 
 class Concept:
@@ -33,6 +33,11 @@ class Concept:
     A raw monthly view count of the Wikipedia article associated with the concept. This metric is used as a
     meter-stick of how relatively important this concept is. This is important for when we want to curate the
     concepts in our ConceptModel to more general ones.
+
+    This parameter is left unset by default, and should be set by higher-level operations (using the
+    Concept.set_view_count() method). This is done because a lot of potential applications of this library do not
+    need a view count at all, without which initialization gains a significant speed bump (because retrieving the
+    view count requires networking to the Wikimedia servers, by definition a slow operation).
     """
     view_count = 0
 
@@ -52,8 +57,8 @@ class Concept:
             self.name = label[:label.find("(")]
         else:
             self.name = label
-        # Retrieve and parse article page views. Take the daily average of the number of views over the last 30 days.
-        self.set_view_count()
+        # The view_count attribute is left unset by default.
+        # self.set_view_count()
 
     def __str__(self):
         """
@@ -61,6 +66,21 @@ class Concept:
         :return: The Concept's name string.
         """
         return self.name
+
+    def __eq__(self, other):
+        """
+        Two concepts are equal when their labels are equivalent.
+        """
+        if self and other:
+            return self.label == other.label
+        else:
+            return False
+
+    def __hash__(self):
+        """
+        Two concepts have an equivalent hash if their labels are equivalent.
+        """
+        return int(hashlib.md5(self.label.encode()).hexdigest(), 16)
 
     def set_view_count(self):
         """
@@ -77,28 +97,17 @@ class Concept:
         """
         self.relevance = relevance
 
-    def expand(self, level=0, limit=10):
-        """
-        Returns a networkx (nx) directed graph (anchored tree) of concepts related to the current one, suitable for
-        assignment to a ConceptModel object. Note that what this function returns is *not* a ConceptModel object
-        itself! Just an nx graph that can be assigned to one!
 
-        The action of mining a concept and then linking it to a pre-existing graph is known as "expanding" it,
-        a terminology used throughout this library.
-
-        :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
-        most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-        parameter is a parameter that is passed directly to the IBM Watson API call.
-        :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
-        directly to the IBM Watson API call.
-        :return: Returns a ConceptModel of related concepts (an anchored tree). Note that this is *not* a
-        ConceptModel object itself! Just an nx graph that can be assigned to one!
-        """
-        rel_graph = nx.Graph()
-        related_concepts_raw = event_insight_lib.get_related_concepts(self.label, level=level, limit=limit)
-        for raw_concept in related_concepts_raw['concepts']:
-            # Remove the `A-A` edge returned by the raw `get_related_concepts` class.
-            if raw_concept['concept']['label'] != self.label:
-                new_node = Concept(raw_concept['concept']['label'])
-                rel_graph.add_edge(self, new_node, weight=raw_concept['score'])
-        return rel_graph
+def map_user_input_to_concept(user_input):
+    """
+    Attempts to map arbitrary user input to a valid Concept. If the method is unsuccessful the Concept remains
+    unchanged.
+    :param user_input: Arbitrary user input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (
+    e.g. "the iPhone 5C, released this Thursday..." -> iPhone)
+    """
+    # Fetch the precise name of the node (article title) associated with the institution.
+    raw_concepts = event_insight_lib.annotate_text(user_input)
+    # If the correction call is successful, keep going.
+    if 'annotations' in raw_concepts.keys() and len(raw_concepts['annotations']) != 0:
+        matched_concept_node_label = raw_concepts['annotations'][0]['concept']['label']
+        return Concept(matched_concept_node_label)
