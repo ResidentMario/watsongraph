@@ -38,3 +38,9 @@ concept_insight_credentials.json
 token.json
 accounts.json
 events.json
+
+# Test files
+graph_test.py
+model_test.py
+io_test.py
+test.py
