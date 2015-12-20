@@ -36,3 +36,15 @@ class Item:
         # Set the relevance parameters of the underlying Concepts to 1.0 to start off with.
         for concept in self.model.concepts():
             concept.relevance = 1
+
+    def concepts(self):
+        """
+        :return: The concepts in the Item model.
+        """
+        return self.model.concepts()
+
+    def labels(self):
+        """
+        :return: The labels for the concepts in the Item model.
+        """
+        return self.model.labels()

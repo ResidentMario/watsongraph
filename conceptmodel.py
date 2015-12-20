@@ -75,7 +75,6 @@ class ConceptModel:
         """
         :return: Returns a sorted list of all labels in the ConceptModel.
         """
-        print([concept for concept in self.concepts()])
         return sorted([concept.label for concept in self.concepts()])
 
     def set_view_counts(self):
@@ -193,3 +192,38 @@ class ConceptModel:
             concept_node.set_relevance((concept_node.relevance + mixin_concept_model.get_concept(
                     concept_node.label).relevance) / 2)
         return overlapping_concept_nodes
+
+
+#######################
+# Read/write methods. #
+#######################
+
+def convert_concept_model_to_data(concept_model):
+    """
+    Returns the JSON representation of a ConceptModel. Counter-operation to load_from_dict().
+    :param concept_model: A ConceptModel.
+    :return: The nx dictionary representation of the ConceptModel.
+    """
+    model_schema = []
+    for concept_node in concept_model.concepts():
+        model_schema.append({'label': concept_node.label,
+                             'view_count': concept_node.view_count,
+                             'relevance': concept_node.relevance})
+    concept_model_schema = {'maturity': concept_model.maturity, 'graph': model_schema}
+    return concept_model_schema
+
+
+def load_concept_model_from_data(data):
+    """
+    Generates a ConceptModel out of a JSON representation. Counter-operation to convert_concept_to_dict().
+    :param data: The dictionary being passed to the method.
+    :return: The generated ConceptModel.
+    """
+    concept_model = ConceptModel()
+    concept_model.maturity = data['maturity']
+    for concept_data in data['graph']:
+        new_concept = Concept(label=concept_data['label'])
+        new_concept.view_count = concept_data['view_count']
+        new_concept.relevance = concept_data['relevance']
+        concept_model.add(new_concept)
+    return concept_model

@@ -1,8 +1,10 @@
 from conceptmodel import ConceptModel
-import matplotlib.pyplot as plt
+from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
+from concept import Concept
 
-G = ConceptModel(['IBM'])
-
-moma_graph = ConceptModel(['Museum of Modern Art'])
-moma_graph.visualize()
-plt.show()
+mock_model = ConceptModel([Concept('IBM'), Concept('IBM Watson')])
+d = convert_concept_model_to_data(mock_model)
+print(d)
+mock_model_loaded = load_concept_model_from_data(d)
+print(mock_model_loaded.labels())
+print(mock_model_loaded.maturity)

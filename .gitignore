@@ -33,3 +33,5 @@ pip-delete-this-directory.txt
 # Credentials
 concept_insight_credentials.json
 token.json
+accounts.json
+events.json

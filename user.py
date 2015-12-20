@@ -1,7 +1,11 @@
-# import os
-# import json
+# Standard libraries.
+import os
+import json
 # import flask.ext.login as flask_login
+# Own libraries.
 from conceptmodel import ConceptModel
+from concept import map_user_input_to_concept
+from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
 
 
 # class User(flask_login.UserMixin):
@@ -17,9 +21,8 @@ class User:
     'exceptions' field, so as not to repeatedly return the same items to them."""
     exceptions = None
 
-    def __init__(self, model=ConceptModel(), email='', exceptions=None, password=''):
-        self.id = email
-        self.id = email
+    def __init__(self, model=ConceptModel(), user_id='', exceptions=None, password=''):
+        self.id = user_id
         self.model = model
         self.exceptions = exceptions
         self.password = password
@@ -51,7 +54,7 @@ class User:
         best_event = None
         highest_relevance = 0.0
         for event in event_list:
-            if self.interest_in(event) >= highest_relevance:
+            if self.interest_in(event) >= highest_relevance and event.label not in self.exceptions:
                 best_event = event
         return best_event
 
@@ -72,6 +75,17 @@ class User:
         """
         self.exceptions.append(event.name)
 
+    def input_interest(self, interest):
+        """
+        Resolves arbitrary user input to a Concept (using the name-imported Concept.map_user_input_to_concept
+        method), explodes that concept, and adds it to the user's present graph.
+        :param interest:
+        :return:
+        """
+        # TODO: Model math.
+        mapped_concept = map_user_input_to_concept(interest)
+        mapped_model = ConceptModel([mapped_concept]).explode()
+        self.model.merge_with(mapped_model)
 
     # ##########################
     # # AUTHENTICATION METHODS #
@@ -91,142 +105,104 @@ class User:
     # def get_id(self):
     #     return self.email
 
-    ################
-    # USER METHODS #
-    ################
-    # These methods were written for the purposes of this script.
+#######################
+# Read/write methods. #
+#######################
 
-    # def loadUser(self, email, filename='accounts.json'):
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         raise IOError('Error: accounts file ' + filename + ' not found.')
-    #     else:
-    #         data = json.load(open(filename))
-    #         emails = [account['email'] for account in data['accounts']]
-    #         if email not in emails:
-    #             raise IOError('Error: User with the ID ' + email + ' not found in accounts file ' + filename)
-    #         else:
-    #             user_index = 0
-    #             for i in range(0, len(data['accounts'])):
-    #                 if data['accounts'][i]['email'] == email:
-    #                     user_index = i
-    #                     break
-    #             user_data = data['accounts'][user_index]
-    #             user = User(email=email,
-    #                         model=ConceptModel(model=user_data['model']['concepts'],
-    #                                            maturity=user_data['model']['maturity']),
-    #                         exceptions=user_data['exceptions'],
-    #                         password=user_data['password']
-    #                         )
-    #             return user
-    #
-    # def updateUser(self, email='', exceptions=[], model=ConceptModel(), password='', maturity=0,
-    #                filename='accounts.json'):
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         raise IOError('Error: accounts file ' + filename + ' not found.')
-    #     else:
-    #         if password:
-    #             self.password = password
-    #         if email:
-    #             self.updateEmail(email)
-    #             self.email = email
-    #         if exceptions:
-    #             self.exceptions = exceptions
-    #         if model != ConceptModel():
-    #             self.model = model
-    #         if maturity:
-    #             self.model.maturity = maturity
-    #         self.saveUser(filename=filename)
-    #
-    # def saveUser(self, filename='accounts.json'):
-    #     user_schema = {
-    #         "password": self.password,
-    #         "model": {
-    #             "concepts": self.model.graph,
-    #             "maturity": self.model.maturity
-    #         },
-    #         "email": self.email,
-    #         "exceptions": self.exceptions
-    #     }
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         new_file_schema = {
-    #             "accounts":
-    #                 [user_schema]
-    #         }
-    #         f = open(filename, 'w')
-    #         f.write(json.dumps(new_file_schema, indent=4))
-    #         f.close()
-    #     else:
-    #         data = json.load(open(filename))
-    #         emails = [account['email'] for account in data['accounts']]
-    #         if self.email not in emails:
-    #             data['accounts'].append(user_schema)
-    #             with open(filename, 'w') as outfile:
-    #                 json.dump(data, outfile, indent=4)
-    #         if self.email in emails:
-    #             user_index = 0
-    #             for i in range(0, len(data['accounts'])):
-    #                 if data['accounts'][i]['email'] == self.email:
-    #                     user_index = i
-    #                     break
-    #             data['accounts'][user_index] = user_schema
-    #             with open(filename, 'w') as outfile:
-    #                 json.dump(data, outfile, indent=4)
-    #
-    # def deleteUser(self, filename='accounts.json'):
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         raise IOError('Error: accounts file ' + filename + ' not found.')
-    #     else:
-    #         data = json.load(open(filename))
-    #         user_index = 0
-    #         for i in range(0, len(data['accounts'])):
-    #             if data['accounts'][i]['email'] == self.email:
-    #                 user_index = i
-    #                 break
-    #         data['accounts'].pop(user_index)
-    #         with open(filename, 'w') as outfile:
-    #             json.dump(data, outfile, indent=4)
 
-    # def getPassword(self, filename='accounts.json'):
-    #     """Retrieves the user's password from the data."""
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         raise IOError('Error: accounts file ' + filename + ' not found.')
-    #     else:
-    #         data = json.load(open(filename))
-    #         emails = [account['email'] for account in data['accounts']]
-    #         if self.email not in emails:
-    #             raise IOError('Error: User with the ID ' + self.email + ' not found in accounts file ' + filename)
-    #         else:
-    #             user_index = 0
-    #             for i in range(0, len(data['accounts'])):
-    #                 if data['accounts'][i]['email'] == self.email:
-    #                     user_index = i
-    #                     break
-    #             return data['accounts'][user_index]['password']
+def save_user(user, filename='accounts.json'):
+    """
+    Saves a user to a JSON file.
+    :param user: The user to be saved to JSON.
+    :param filename: The filename for the account storage file; `accounts.json` is the default.
+    """
+    user_schema = {
+        "password": user.password,
+        "model": convert_concept_model_to_data(user.model),
+        "id": user.id,
+        "exceptions": user.exceptions
+    }
+    print(str(user_schema))
+    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+        new_file_schema = {
+            "accounts":
+                [user_schema]
+        }
+        f = open(filename, 'w')
+        f.write(json.dumps(new_file_schema, indent=4))
+        f.close()
+    else:
+        data = json.load(open(filename))
+        ids = [account['id'] for account in data['accounts']]
+        if user.id not in ids:
+            data['accounts'].append(user_schema)
+            with open(filename, 'w') as outfile:
+                json.dump(data, outfile, indent=4)
+        if user.id in ids:
+            user_index = 0
+            for i in range(0, len(data['accounts'])):
+                if data['accounts'][i]['id'] == user.id:
+                    user_index = i
+                    break
+            data['accounts'][user_index] = user_schema
+            with open(filename, 'w') as outfile:
+                json.dump(data, outfile, indent=4)
 
-    # def getBestEvent(self, filename='events.json'):
-    #     """Returns the event most relevant to this user's interests."""
-    #     if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-    #         raise IOError('Error: events file ' + filename + ' not found.')
-    #     data = json.load(open(filename))
-    #     best_event = Event()
-    #     best_score = 0
-    #     for event in data['events']:
-    #         iter_event = Event()
-    #         # The declarations are split to keep the Item __init__ method for automatically calling the API to
-        # populate the model.
-    #         iter_event.description = event['description']
-    #         iter_event.name = event['name']
-    #         iter_event.model = ConceptModel(model=event['model']['concepts'], maturity=1)
-    #         iter_event.start_time = event['starttime']
-    #         iter_event.end_time = event['endtime']
-    #         iter_event.location = event['location']
-    #         iter_event.picture = event['picture']
-    #         iter_event.name = event['name']
-    #         iter_event.url = event['url']
-    #         score = best_event.compare(iter_event)
-    #         if score >= best_score:
-    #             # print(self.exceptions)
-    #             if iter_event.name not in self.exceptions:
-    #                 best_event = iter_event
-    #                 best_score = score
-    #     return best_event
+
+def load_user(user_id, filename='accounts.json'):
+    """
+    Saves a user to a JSON file.
+    :param user_id: The id (username, email, etc.) of the user to be loaded from the JSON.
+    :param filename: The filename for the account storage file; `accounts.json` is the default.
+    """
+    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+        raise IOError('Error: accounts file ' + filename + ' not found.')
+    else:
+        data = json.load(open(filename))
+        user_ids = [account['id'] for account in data['accounts']]
+        if user_id not in user_ids:
+            raise IOError('Error: User with the ID ' + user_id + ' not found in accounts file ' + filename)
+        else:
+            user_index = 0
+            for i in range(0, len(data['accounts'])):
+                if data['accounts'][i]['id'] == user_id:
+                    user_index = i
+                    break
+            user_data = data['accounts'][user_index]
+            user = User(user_id=user_id,
+                        model=load_concept_model_from_data(user_data['model']),
+                        exceptions=user_data['exceptions'],
+                        password=user_data['password']
+                        )
+            return user
+
+
+def update_user_credentials(user, filename='accounts.json'):
+    """
+    Updates User information in the JSON. This is a seperate method in order to account for password and id
+    manipulation (otherwise `save_user()` alone works fine).
+    :param user: The User whose data is being manipulated.
+    :param filename: The filename for the account storage file; `accounts.json` is the default.
+    """
+    delete_user(user, filename)
+    save_user(user, filename)
+
+
+def delete_user(user, filename='accounts.json'):
+    """
+    Deletes a User object from the JSON entirely.
+    :param user:
+    :param filename: The filename for the account storage file; `accounts.json` is the default.
+    """
+    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+        raise IOError('Error: accounts file ' + filename + ' not found.')
+    else:
+        data = json.load(open(filename))
+        user_index = 0
+        for i in range(0, len(data['accounts'])):
+            if data['accounts'][i]['id'] == user.id:
+                user_index = i
+                break
+        data['accounts'].pop(user_index)
+        with open(filename, 'w') as outfile:
+            json.dump(data, outfile, indent=4)
