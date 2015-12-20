@@ -1,9 +1,6 @@
 from concept import Concept
 import networkx as nx
-import matplotlib.pyplot as plt
 import event_insight_lib
-
-# TODO: Better visualize() method.
 
 
 class ConceptModel:
@@ -85,14 +82,6 @@ class ConceptModel:
         for concept in self.concepts():
             concept.set_view_count()
 
-    def visualize(self):
-        """
-        Simple ConceptModel visualizer. Not very elegant! Should look into proper graph visualization libraries?
-        """
-        plt.axis('off')
-        nx.draw_networkx(self.graph, with_labels=True, node_color='#A0CBE2', width=2, style='solid', linewidths=None,
-                         alpha=0.8, edge_cmap=plt.cm.Blues, font_size=8)
-
     ##################
     # Graph methods. #
     ##################
@@ -100,7 +89,6 @@ class ConceptModel:
     def add(self, concept):
         """
         Simple adder method.
-
         :param concept: Concept to be added to the model.
         """
         self.graph = nx.compose(self.graph, ConceptModel([concept]).graph)

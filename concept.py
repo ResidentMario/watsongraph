@@ -49,7 +49,7 @@ class Concept:
 
     def __init__(self, label):
         """
-        :param label: The node label used to initialize the concept.
+        :param label: The concept_node label used to initialize the concept.
         """
         self.node = "/graphs/wikipedia/en-20120601/concepts/" + label.replace(' ', '_')
         self.label = label
@@ -58,14 +58,6 @@ class Concept:
         else:
             self.name = label
         # The view_count attribute is left unset by default.
-        # self.set_view_count()
-
-    def __str__(self):
-        """
-        Morphs the string representation of the Concept into its label. Used by the conceptmodel.visualize() plotter.
-        :return: The Concept's name string.
-        """
-        return self.name
 
     def __eq__(self, other):
         """
@@ -78,7 +70,8 @@ class Concept:
 
     def __hash__(self):
         """
-        Two concepts have an equivalent hash if their labels are equivalent.
+        Two concepts have an equivalent hash if their labels are equivalent. Comparison-by-hash is overwritten this
+        way to support nx.compose().
         """
         return int(hashlib.md5(self.label.encode()).hexdigest(), 16)
 

@@ -1,18 +1,13 @@
-# Standard libraries.
 import os
 import json
-# import flask.ext.login as flask_login
-# Own libraries.
 from conceptmodel import ConceptModel
 from concept import map_user_input_to_concept
 from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
 
 
-# class User(flask_login.UserMixin):
 class User:
     """
-    The User class implemented for the purposes of Flask-Login.
-    Throughout the application, `flask_login.current_user` is the current User() instance.
+    The application's User has their preferences stored in their own ConceptModel().
     """
     id = ''
     password = ''
@@ -22,34 +17,48 @@ class User:
     exceptions = None
 
     def __init__(self, model=ConceptModel(), user_id='', exceptions=None, password=''):
+        """
+        :param model: The ConceptModel() initially associated with the user. An empty one by default.
+        :param user_id: The id associated with the user. An empty string by default.
+        :param exceptions: The exceptions (items already viewed and either acted upon or passed on) associated with the
+        user.
+        :param password: The password associated with the user. An empty string by default.
+        """
         self.id = user_id
         self.model = model
         self.exceptions = exceptions
         self.password = password
 
     def concepts(self):
+        """
+        :return: The Concept() objects associated with the user's model.
+        """
         return self.model.concepts()
 
     def labels(self):
+        """
+        :return: The labels of the concepts associated with the user's model.
+        """
         return self.model.labels()
 
-    def interest_in(self, event):
+    def interest_in(self, item):
         """
-        :param event: An Event object to be compared to.
-        :return: Returns a [0, 1] rating of this user's hypothesized interest in the given event.
+        :param item: An Item object to be compared to.
+        :return: Returns a float that rates this user's hypothesized interest in the given event, based on the
+        intersection between their own ConceptModel and that of the examined Event.
         """
-        intersection = self.model.intersection_with(event.model)
+        intersection = self.model.intersection_with(item.model)
         if len(intersection) == 0:
             return 0
         else:
             # TODO: Improve the mathematics of this model.
             return sum([concept_node.relevance for concept_node in intersection]) / len(intersection)
 
-    def get_best_event(self, event_list):
+    def get_best_item(self, event_list):
         """
         Retrieves the event within a list of events which is most relevant to the given user's interests.
-        :param event_list: The list of events to be examined.
-        :return:
+        :param event_list: The list of Event objects to be examined.
+        :return: The Event which best matches the user's interests.
         """
         best_event = None
         highest_relevance = 0.0
@@ -58,52 +67,47 @@ class User:
                 best_event = event
         return best_event
 
-    def express_interest(self, event):
+    def express_interest(self, item):
         # TODO: Model math.
         """
-        Merges interest in an event into the user model.
-        :param event: Event object the user is expressing interest in.
+        Merges interest in an event into the user model. Adds the Item in which interest has been expressed to the
+        exceptions.
+        :param item: Event object the user is expressing interest in.
         """
-        self.model.merge_with(event.model)
-        self.exceptions.append(event.name)
+        self.model.merge_with(item.model)
+        self.exceptions.append(item.name)
 
-    def express_disinterest(self, event):
+    def express_disinterest(self, item):
         # TODO: Model math.
         """
-        Merges disinterest in an event into the user model.
-        :param event: Event object the user is expressing disinterest in.
+        Merges disinterest in an event into the user model. Adds the Item in which interest has been expressed to the
+        exceptions.
+        :param item: Event object the user is expressing disinterest in.
         """
-        self.exceptions.append(event.name)
+        self.exceptions.append(item.name)
 
     def input_interest(self, interest):
         """
         Resolves arbitrary user input to a Concept (using the name-imported Concept.map_user_input_to_concept
         method), explodes that concept, and adds it to the user's present graph.
-        :param interest:
-        :return:
+        :param interest: Arbitrary user input.
         """
         # TODO: Model math.
         mapped_concept = map_user_input_to_concept(interest)
-        mapped_model = ConceptModel([mapped_concept]).explode()
-        self.model.merge_with(mapped_model)
+        if mapped_concept:
+            mapped_model = ConceptModel([mapped_concept]).explode()
+            self.model.merge_with(mapped_model)
 
-    # ##########################
-    # # AUTHENTICATION METHODS #
-    # ##########################
-    # # flask_login uses these methods for user authentication in the application.
-    #
-    # def is_authenticated(self):
-    #     data = json.load(open(filename))
-    #     return self.email in [account['email'] for account in data['accounts']]
-    #
-    # def is_active(self):
-    #     True
-    #
-    # def is_anonymous(self):
-    #     return self.email == ''
-    #
-    # def get_id(self):
-    #     return self.email
+    def input_interests(self, interests):
+        """
+        Resolves a series of arbitrary user inputs to Concepts (using the name-imported
+        Concept.map_user_input_to_concept method), explodes that concept, and adds it to the user's present
+        graph.
+        :param interests: Arbitrary user input.
+        """
+        for interest in interests:
+            self.input_interest(interest)
+
 
 #######################
 # Read/write methods. #

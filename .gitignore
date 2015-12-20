@@ -33,11 +33,12 @@ pip-delete-this-directory.txt
 
 # Project-specific
 
-# Credentials
+# JSON files.
 concept_insight_credentials.json
 token.json
 accounts.json
 events.json
+items.json
 
 # Test files
 graph_test.py
