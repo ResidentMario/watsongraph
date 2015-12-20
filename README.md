@@ -17,13 +17,14 @@ An example of a web application using this code is provided in the [cultural-ins
 
 Note that in order to use the IBM Watson cognitive APIs you *must* register an account on Bluemix first.
 
-Once you have forked and pulled the code onto your local development machine, you will need to create a `token.json`
-file containing your [IBM Bluemix](https://console.ng.bluemix.net/) access credentials. If you do not have an
-account already you may [register](https://console.ng.bluemix.net/registration/) for a free trial account. Once you
-are logged in, enter the catalog, scroll down to the "IBM Watson" section, and click through to create an instance
-of the "Concept Insights" service. Go back to the dashboard, click on the newly populated service, and click through
- to "Service Credentials" on the sidebar to get your service credentials: copy-paste this file and save it locally
- as the aforementioned `concept_insight_credentials.json`. Your credentials should look something like this:
+Once you have forked and pulled the code onto your local development machine, you will need to create a
+`concept_insight_credentials.json` file containing your [IBM Bluemix](https://console.ng.bluemix.net/) access
+credentials. If you do not have an account already you may [register](https://console.ng.bluemix.net/registration/)
+for a free trial account. Once you are logged in, enter the catalog, scroll down to the "IBM Watson" section, and
+click through to create an instance of the "Concept Insights" service. Go back to the dashboard, click on the newly
+populated service, and click through to "Service Credentials" on the sidebar to get your service credentials:
+copy-paste this file and save it locally as the aforementioned `concept_insight_credentials.json`. Your credentials
+should look something like this:
 
 ```
 {
