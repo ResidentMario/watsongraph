@@ -22,12 +22,13 @@ class ConceptModel:
         self.graph = nx.Graph()
         # Enter and associate the starting nodes.
         if list_of_concepts:
-            for concept in list_of_concepts:
-                # mixin_graph = Concept(label).expand()
+            for concept_label in list_of_concepts:
+                mixin_concept = Concept(concept_label)
                 # mixin_concept_model = ConceptModel()
-                # mixin_concept_model.graph = mixin_graph
+                # mixin_concept_model.add(mixin_concept)
+                # mixin_concept_model.explode()
                 # self.merge_with(mixin_concept_model)
-                self.graph.add_node(concept)
+                self.graph.add_node(mixin_concept)
         # Set the maturity of the resultant model.
         self.set_maturity()
 

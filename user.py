@@ -95,7 +95,9 @@ class User:
         # TODO: Model math.
         mapped_concept = map_user_input_to_concept(interest)
         if mapped_concept:
-            mapped_model = ConceptModel([mapped_concept]).explode()
+            mapped_model = ConceptModel()
+            mapped_model.add(mapped_concept)
+            mapped_model.explode()
             self.model.merge_with(mapped_model)
 
     def input_interests(self, interests):

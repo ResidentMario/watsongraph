@@ -36,22 +36,115 @@ of the "Concept Insights" service. Go back to the dashboard, click on the newly 
 ```
 
 If you are a developer you may also be interested in reading the [Congitive Insight API documentation](https://watson-api-explorer.mybluemix.net/swagger.html?url=/listings/concept-insights-v2.json#!/graphs/graphLabelSearch).
+Note that outside of the thirty-day trial, high-throughput queries to IBM Bluemix can quickly prove costly, but for
+experimental purposes the free allotment is more than enough.
 
 Aside from that you will need the `networkx`, `requests`, and `mwviews` packages, all of with are easy to `pip`.
 
 ## Examples
 
+### Concept mapping
+
+One way to explore Wikipedia articles (one that has been used pretty exhaustively in the research space) is to crawl
+it for links, performing operations of interest on particular articles and then jumping along to the next batch of
+links that that page turns up. This library allows for an interesting alternative possibility: exploring Wikipedia
+based on topical connections between articles generated not by "dumb" links between pages, but instead by "smart"
+learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
+development today.
+
+Here's a peek at what we can do.
+
+```
+>>> from conceptmodel import ConceptModel
+```
+
+Let's populate a simple conceptual graph.
+
+```
+>>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk', 'Brownian motion'])
+```
+
+Note that this only adds exactly those nodes to the graphs.
+
+```
+>>> stochastic_topics.labels()
+['Brownian motion', 'Markov chain', 'Random walk']
+```
+
+To extrapolate forward from this we can `explode()` our graph.
+
+```
+>>> stochastic_topics.explode()
+>>> stochastic_topics.labels()
+
+['Brownian motion', 'Continuous function', 'Eigenvalues and eigenvectors', 'Function (mathematics)', 'Graph theory',
+ 'Integral', 'List of statistics articles', 'Markov chain', 'Matrix (mathematics)', 'Normal distribution',
+ 'Probability', 'Probability distribution', 'Quantum field theory', 'Random walk', 'Real number', 'Statistics']
+```
+
+We can also use `expand` to focus-expand only those nodes that have less than some number `n` existing edges.
+
+Speaking of edges...
+
+```
+>>> stochastic_topics.print_edges()
+
+1: Probability distribution <-> Brownian motion
+2: Probability distribution <-> Markov chain
+3: Probability distribution <-> Random walk
+4: Integral <-> Brownian motion
+5: Matrix (mathematics) <-> Markov chain
+6: Matrix (mathematics) <-> Random walk
+...[snipped for brevity]...
+```
+
+Analysis tools are in continued development.
+
+### User modeling
+
 Hi, I'm Bob.
 ```
-Bob = User(user_id="Bob")
+>>> from user import User
+>>> Bob = User(user_id="Bob")
 ```
 I'm kind of crazy about data technologies. Can't get enough of it, really!
 ```
-Bob.input_interests(["Data science", "Machine learning", "Big data", "Cognitive science"])
+>>> Bob.input_interests(["Data science", "Machine learning", "Big data", "Cognitive science"])
 ```
 I hear IBM has been doing really cool things with Watson!
 ```
-Bob.input_interest("IBM Watson")
+>>> Bob.input_interest("IBM Watson")
+```
+I am interested in quite a large number of things, really.
+```
+>>> Bob.labels()
+
+['Algorithm', 'Artificial intelligence', 'Association for Computing Machinery', 'Big data', 'Bioinformatics', 'Cloud
+ 'computing', 'Cognition', 'Cognitive science', 'Computer programming', 'Consciousness', 'Data science', 'Database',
+ 'Engineering', 'Epistemology', 'Game show', 'IBM', 'Index of psychology articles', 'Index of robotics articles',
+ 'Java (programming language)', 'List of statistics articles', 'Machine learning', 'Metadata', 'MySQL',
+ 'Neuroscience', 'Noam Chomsky', 'Normal distribution', 'Oracle Corporation', 'Perl', 'Probability', 'Probability
+  distribution', 'Rensselaer Polytechnic Institute', 'SQL', 'Semantics', 'Software as a service', 'Statistics',
+ 'Supercomputer', 'Syntax', 'Watson (computer)', 'Web search engine', 'Wikipedia']
+
 ```
 
-...
+I heard that there is going to be a [NYC Data Wranglers](http://www.meetup.com/NYC-Data-Wranglers/) meet-up soon, I
+wonder if I should go?
+
+```
+>>> from event import Event
+>>> meetup = Event('Data Science in Practice: The New York Times, Greenhouse, Socure, Via, and YipitData',
+               'Join us for a discussion panel with data scientists from Greenhouse, the New York Times, Socure, Via,
+               and YipitData...[snipped for brevity]')
+>>> Bob.interest_in(meetup)
+<<< 0.728
+```
+
+Guess I'm going!
+
+
+## Documentation
+
+This library is still in active development. Lot more documentation will be written up once it's in a more polished
+state!
