@@ -3,5 +3,6 @@
 matplotlib
 networkx
 requests
+WTForms
 # The following packages are not avaiable to Conda and must be pip-installed:
 # mwviews
