@@ -1,4 +1,4 @@
-# watson-recommend
+# watson-graph
 This repository defines a concept graphing and recommendation construction engine. Individual concept "nodes" are
 associated with labels from the IBM Watson `en-20120601` cognitive graph, which is queried using the [Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html)
 and reconstructed locally as a [networkx](https://networkx.github.io/)-based weighted conceptual graph.
