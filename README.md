@@ -23,7 +23,7 @@ account already you may [register](https://console.ng.bluemix.net/registration/)
 are logged in, enter the catalog, scroll down to the "IBM Watson" section, and click through to create an instance
 of the "Concept Insights" service. Go back to the dashboard, click on the newly populated service, and click through
  to "Service Credentials" on the sidebar to get your service credentials: copy-paste this file and save it locally
- as the aforementioned `token.json`. Your credentials should look something like this:
+ as the aforementioned `concept_insight_credentials.json`. Your credentials should look something like this:
 
 ```
 {
