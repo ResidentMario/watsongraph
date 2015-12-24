@@ -38,7 +38,7 @@ class Node:
     """
     relevance = 0.0
 
-    def __init__(self, concept):
+    def __init__(self, concept, view_count=view_count, relevance=relevance):
         """
         :param concept: The raw concept used to initialize the node.
         """
@@ -48,6 +48,10 @@ class Node:
             self.name = concept[:concept.find("(")]
         else:
             self.name = concept
+        if view_count:
+            self.view_count = view_count
+        if relevance:
+            self.relevance = relevance
         # The view_count attribute is left unset by default.
 
     def __eq__(self, other):
@@ -65,6 +69,25 @@ class Node:
         way to support `nx.compose()` as used in `conceptmodel.merge_with()`.
         """
         return int(hashlib.md5(self.concept.encode()).hexdigest(), 16)
+
+    # def dict_repr(self):
+    #     """
+    #     Makes this object JSON serializable.
+    #     """
+    #     return {
+    #         'concept': self.concept,
+    #         'view_count': self.view_count,
+    #         'relevance': self.relevance
+    #     }
+    #
+    # def list_repr(self):
+    #     """
+    #     Makes this object JSON serializable.
+    #     """
+    #     return [self.concept, self.view_count, self.relevance]
+
+    def hacky_str_rpr(self):
+        return self.concept + '_' + str(self.relevance) + '_' + str(self.view_count)
 
     def set_view_count(self):
         """

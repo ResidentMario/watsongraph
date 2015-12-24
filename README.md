@@ -134,8 +134,8 @@ that any concepts
 you attempt to plug into your model directly correspond exactly with the titles of their corresponding articles. For
 example, Wikipedia has a page for `Bayes' theorem` - but not for `Bayes' Theorem` or for `Bayes' law`. Thus calling
 `stochastic_topics.add("Bayes' law")` would work but would cause problems down the line. Instead if you are inputting
- a concept label that is reasonably close to the correct one you can explicitly run it through Watson again to map
- it directly:
+ a concept label that is reasonably close to the correct one you can explicitly run it through Watson to sanitize
+ the input and make it safe for use:
 
 ```
 >>> from node import conceptualize
