@@ -1,15 +1,16 @@
 # watson-graph
-This repository defines a concept graphing and recommendation construction engine. Individual concept "nodes" are
-associated with labels from the IBM Watson `en-20120601` cognitive graph, which is queried using the [Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html)
-and reconstructed locally as a [networkx](https://networkx.github.io/)-based weighted conceptual graph.
+`watson-graph` is a Pythonic concept graphing and recommendation library.
+The library's core `ConceptModel` objects is constructed out of the individual concept nodes which are associated with
+labels from the IBM Watson `wikipedia/en-20120601` cognitive graph, queried using the
+[Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html) and
+reconstructed locally as a [networkx](https://networkx.github.io/)-based weighted conceptual graph.
 
-Vertices (nodes) are defined by `Concept` objects, each mapped to a unique Wikipedia page, which are in turn
+Nodes are defined by `Concept` objects, each mapped to a unique Wikipedia page, which are in turn
 connected to one another by edges demarcating relevance (on a 0-to-1 probabilistic scale) within a
 `ConceptMap` object.
 
-This `ConceptMap` can then be associated with any number of applications. The one provided here is a recommendation
-system: graphs are constructed mapping the conceptual content of sets of `Item` and `User` objects. Each `User` may
-then use their map to find `Item` recommendations which best fit their own conceptual interests.
+This `ConceptMap` can then be associated with any number of applications. Basic bindings are provided, in particular,
+ for a recommendation service based on `Item` and `User` classes.
 
 An example of a web application using this code is provided in the [cultural-insight](https://github.com/ResidentMario/cultural-insight) repository.
 
@@ -153,6 +154,10 @@ example, Wikipedia has a page for `Bayes' theorem` - but not for `Bayes' Theorem
 
 ### User modeling
 
+`watson-graph` provides basic but durable recommendation engine bindings in the form of the `Item` and `User` classes.
+The [Cultural Insight](https://github.com/ResidentMario/cultural-insight) repository provides an example of just such
+ an application.
+
 Hi, I'm Bob.
 ```
 >>> from user import User
@@ -168,7 +173,7 @@ I hear IBM has been doing really cool things with Watson!
 ```
 I am interested in quite a large number of things, really.
 ```
->>> Bob.labels()
+>>> Bob.concepts()
 
 ['Algorithm', 'Artificial intelligence', 'Association for Computing Machinery', 'Big data', 'Bioinformatics', 'Cloud
  'computing', 'Cognition', 'Cognitive science', 'Computer programming', 'Consciousness', 'Data science', 'Database',
@@ -184,18 +189,21 @@ I heard that there is going to be a [NYC Data Wranglers](http://www.meetup.com/N
 wonder if I should go?
 
 ```
->>> from event import Event
->>> meetup = Event('Data Science in Practice: The New York Times, Greenhouse, Socure, Via, and YipitData',
+>>> from item import Item
+>>> meetup = Item('Data Science in Practice: The New York Times, Greenhouse, Socure, Via, and YipitData',
                'Join us for a discussion panel with data scientists from Greenhouse, the New York Times, Socure, Via,
                and YipitData...[snipped for brevity]')
 >>> Bob.interest_in(meetup)
 <<< 0.728
 ```
 
-Guess I'm going!
+I guess I'm going!
+
+```
+>>> Bob.express_interest(meetup)
+```
 
 
 ## Documentation
 
-This library is still in active development. Lot more documentation will be written up once it's in a more polished
-state!
+This library is still in active development; more documentation is forthcoming.

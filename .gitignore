@@ -39,6 +39,7 @@ token.json
 accounts.json
 events.json
 items.json
+model.json
 
 # Test files
 graph_test.py

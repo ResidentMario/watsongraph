@@ -2,7 +2,6 @@ import os
 import json
 from conceptmodel import ConceptModel
 from node import conceptualize
-from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
 
 
 class User:
@@ -11,7 +10,7 @@ class User:
     """
     id = ''
     password = ''
-    model = ConceptModel()
+    model = None
     """The list of events that the user has already expressed interest or disinterest in is stored in their
     'exceptions' field, so as not to repeatedly return the same items to them."""
     exceptions = None
@@ -29,13 +28,13 @@ class User:
         self.exceptions = exceptions
         self.password = password
 
-    def concepts(self):
+    def nodes(self):
         """
         :return: The Concept() objects associated with the user's model.
         """
         return self.model.nodes()
 
-    def labels(self):
+    def concepts(self):
         """
         :return: The labels of the concepts associated with the user's model.
         """
@@ -88,127 +87,116 @@ class User:
 
     def input_interest(self, interest):
         """
-        Resolves arbitrary user input to a Concept (using the name-imported Concept.map_user_input_to_concept
-        method), explodes that concept, and adds it to the user's present graph.
+        Resolves arbitrary user input to concepts, explodes the resultant nodes, and adds the resultant graph to the
+        user's present one.
         :param interest: Arbitrary user input.
         """
         # TODO: Model math.
         mapped_concept = conceptualize(interest)
         if mapped_concept:
-            mapped_model = ConceptModel()
-            mapped_model.graph.add_node(mapped_concept)
+            mapped_model = ConceptModel([mapped_concept])
             mapped_model.explode()
             self.model.merge_with(mapped_model)
 
     def input_interests(self, interests):
         """
-        Resolves a series of arbitrary user inputs to Concepts (using the name-imported
-        Concept.map_user_input_to_concept method), explodes that concept, and adds it to the user's present
-        graph.
+        Resolves a series of arbitrary user inputs to concepts, explodes the resultant nodes, and adds the resultant
+        graph to the user's present one.
         :param interests: Arbitrary user input.
         """
         for interest in interests:
             self.input_interest(interest)
 
+    #######################
+    # Read/write methods. #
+    #######################
 
-#######################
-# Read/write methods. #
-#######################
-
-
-def save_user(user, filename='accounts.json'):
-    """
-    Saves a user to a JSON file.
-    :param user: The user to be saved to JSON.
-    :param filename: The filename for the account storage file; `accounts.json` is the default.
-    """
-    user_schema = {
-        "password": user.password,
-        "model": convert_concept_model_to_data(user.model),
-        "id": user.id,
-        "exceptions": user.exceptions
-    }
-    print(str(user_schema))
-    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        new_file_schema = {
-            "accounts":
-                [user_schema]
+    def save_user(self, filename='accounts.json'):
+        """
+        Saves a user to a JSON file.
+        :param self: The user to be saved to JSON.
+        :param filename: The filename for the account storage file; `accounts.json` is the default.
+        """
+        user_schema = {
+            "password": self.password,
+            "model": self.model.to_data(),
+            "id": self.id,
+            "exceptions": self.exceptions
         }
-        f = open(filename, 'w')
-        f.write(json.dumps(new_file_schema, indent=4))
-        f.close()
-    else:
-        data = json.load(open(filename))
-        ids = [account['id'] for account in data['accounts']]
-        if user.id not in ids:
-            data['accounts'].append(user_schema)
-            with open(filename, 'w') as outfile:
-                json.dump(data, outfile, indent=4)
-        if user.id in ids:
-            user_index = 0
-            for i in range(0, len(data['accounts'])):
-                if data['accounts'][i]['id'] == user.id:
-                    user_index = i
-                    break
-            data['accounts'][user_index] = user_schema
-            with open(filename, 'w') as outfile:
-                json.dump(data, outfile, indent=4)
-
-
-def load_user(user_id, filename='accounts.json'):
-    """
-    Saves a user to a JSON file.
-    :param user_id: The id (username, email, etc.) of the user to be loaded from the JSON.
-    :param filename: The filename for the account storage file; `accounts.json` is the default.
-    """
-    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        raise IOError('Error: accounts file ' + filename + ' not found.')
-    else:
-        data = json.load(open(filename))
-        user_ids = [account['id'] for account in data['accounts']]
-        if user_id not in user_ids:
-            raise IOError('Error: User with the ID ' + user_id + ' not found in accounts file ' + filename)
+        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+            new_file_schema = {
+                "accounts":
+                    [user_schema]
+            }
+            f = open(filename, 'w')
+            f.write(json.dumps(new_file_schema, indent=4))
+            f.close()
         else:
+            data = json.load(open(filename))
+            ids = [account['id'] for account in data['accounts']]
+            if self.id not in ids:
+                data['accounts'].append(user_schema)
+                with open(filename, 'w') as outfile:
+                    json.dump(data, outfile, indent=4)
+            if self.id in ids:
+                user_index = 0
+                for i in range(0, len(data['accounts'])):
+                    if data['accounts'][i]['id'] == self.id:
+                        user_index = i
+                        break
+                data['accounts'][user_index] = user_schema
+                with open(filename, 'w') as outfile:
+                    json.dump(data, outfile, indent=4)
+
+    def load_user(self, filename='accounts.json'):
+        """
+        Saves a user to a JSON file.
+        :param filename: The filename for the account storage file; `accounts.json` is the default.
+        """
+        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+            raise IOError('Error: accounts file ' + filename + ' not found.')
+        else:
+            data = json.load(open(filename))
+            user_ids = [account['id'] for account in data['accounts']]
+            if self.id not in user_ids:
+                raise IOError('Error: User with the ID ' + self.id + ' not found in accounts file ' + filename)
+            else:
+                user_index = 0
+                for i in range(0, len(data['accounts'])):
+                    if data['accounts'][i]['id'] == self.id:
+                        user_index = i
+                        break
+                user_data = data['accounts'][user_index]
+                user = User(user_id=self.id,
+                            model=self.model.load_from_data(user_data['model']),
+                            exceptions=user_data['exceptions'],
+                            password=user_data['password']
+                            )
+                return user
+
+    def update_user_credentials(self, filename='accounts.json'):
+        """
+        Updates User information in the JSON. This is a seperate method in order to account for password and id
+        manipulation (otherwise `save_user()` alone works fine).
+        :param filename: The filename for the account storage file; `accounts.json` is the default.
+        """
+        self.delete_user(filename)
+        self.save_user(filename)
+
+    def delete_user(self, filename='accounts.json'):
+        """
+        Deletes a User object from the JSON entirely.
+        :param filename: The filename for the account storage file; `accounts.json` is the default.
+        """
+        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+            raise IOError('Error: accounts file ' + filename + ' not found.')
+        else:
+            data = json.load(open(filename))
             user_index = 0
             for i in range(0, len(data['accounts'])):
-                if data['accounts'][i]['id'] == user_id:
+                if data['accounts'][i]['id'] == self.id:
                     user_index = i
                     break
-            user_data = data['accounts'][user_index]
-            user = User(user_id=user_id,
-                        model=load_concept_model_from_data(user_data['model']),
-                        exceptions=user_data['exceptions'],
-                        password=user_data['password']
-                        )
-            return user
-
-
-def update_user_credentials(user, filename='accounts.json'):
-    """
-    Updates User information in the JSON. This is a seperate method in order to account for password and id
-    manipulation (otherwise `save_user()` alone works fine).
-    :param user: The User whose data is being manipulated.
-    :param filename: The filename for the account storage file; `accounts.json` is the default.
-    """
-    delete_user(user, filename)
-    save_user(user, filename)
-
-
-def delete_user(user, filename='accounts.json'):
-    """
-    Deletes a User object from the JSON entirely.
-    :param user:
-    :param filename: The filename for the account storage file; `accounts.json` is the default.
-    """
-    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        raise IOError('Error: accounts file ' + filename + ' not found.')
-    else:
-        data = json.load(open(filename))
-        user_index = 0
-        for i in range(0, len(data['accounts'])):
-            if data['accounts'][i]['id'] == user.id:
-                user_index = i
-                break
-        data['accounts'].pop(user_index)
-        with open(filename, 'w') as outfile:
-            json.dump(data, outfile, indent=4)
+            data['accounts'].pop(user_index)
+            with open(filename, 'w') as outfile:
+                json.dump(data, outfile, indent=4)

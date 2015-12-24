@@ -221,7 +221,7 @@ class ConceptModel:
                     concept_node.concept).relevance) / 2)
         return overlapping_concept_nodes
 
-    def save(self):
+    def to_data(self):
         # TODO: This method works by mapping to e.g. IBM_0.981_1982 concatenations. Super hack. Redo this properly.
         """
         Returns the JSON representation of a ConceptModel. Counter-operation to `load_from_dict()`.
@@ -235,7 +235,7 @@ class ConceptModel:
         flattened_model = nx.relabel_nodes(self.graph, dict_map)
         return json_graph.node_link_data(flattened_model)
 
-    def load(self, data):
+    def load_from_data(self, data):
         # TODO: As above, but backwards. Need to redo this properly.
         """
         Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
@@ -244,8 +244,8 @@ class ConceptModel:
         """
         # Generate the un-flattening map.
         self.graph = json_graph.node_link_graph(data)
-        dict_map = {node : Node(node.split("_")[0], relevance=node.split("_")[1], view_count=node.split("_")[2]) for node
-                    in self.nodes()}
+        dict_map = {node: Node(node.split("_")[0], relevance=node.split("_")[1], view_count=node.split("_")[2]) for
+                    node in self.nodes()}
         # Un-flatten the graph and return it.
         self.graph = nx.relabel_nodes(self.graph, dict_map)
 
@@ -262,8 +262,9 @@ def model(user_input):
     :return: The constructed `ConceptModel` object. Might be empty!
     """
     new_model = ConceptModel()
-    related_concepts_raw = event_insight_lib.annotate_text(user_input)
-    new_labels = [raw_concept['concept']['label'] for raw_concept in related_concepts_raw['annotations']]
-    for label in new_labels:
-        new_model.add(label)
+    if user_input:
+        related_concepts_raw = event_insight_lib.annotate_text(user_input)
+        new_labels = [raw_concept['concept']['label'] for raw_concept in related_concepts_raw['annotations']]
+        for label in new_labels:
+            new_model.add(label)
     return new_model

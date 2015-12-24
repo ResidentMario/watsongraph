@@ -1,7 +1,7 @@
 import os
 import json
 from item import Item
-from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
+from conceptmodel import ConceptModel
 
 
 class Event(Item):
@@ -32,72 +32,69 @@ class Event(Item):
         self.picture = picture
         self.url = url
 
-#######################
-# Read/write methods. #
-#######################
+    #######################
+    # Read/write methods. #
+    #######################
 
-
-def save_event(event, filename='events.json'):
-    """
-    Saves the Event to a JSON representation.
-    :param event: The name of the Event object to be loaded from JSON (corresponds with the `Item.name` parameter).
-    :param filename: The filename for the events storage file; `events.json` is the default.
-    """
-    event_schema = {
-        "name": event.name,
-        "model": convert_concept_model_to_data(event.model),
-        "description": event.description,
-        "start_time": event.start_time,
-        "end_time": event.end_time,
-        "location": event.location,
-        "url": event.url,
-        "picture": event.picture
-    }
-    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        new_file_schema = {
-            "events":
-                [event_schema]
+    def save_event(self, filename='events.json'):
+        """
+        Saves the Event to a JSON representation.
+        :param self: The name of the Event object to be loaded from JSON (corresponds with the `Item.name` parameter).
+        :param filename: The filename for the events storage file; `events.json` is the default.
+        """
+        event_schema = {
+            "name": self.name,
+            "model": self.model.to_data(),
+            "description": self.description,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "location": self.location,
+            "url": self.url,
+            "picture": self.picture
         }
-        f = open(filename, 'w')
-        f.write(json.dumps(new_file_schema, indent=4))
-        f.close()
-    else:
-        data = json.load(open(filename))
-        names = [event['name'] for event in data['events']]
-        if event.name not in names:
-            data['events'].append(event_schema)
-            with open(filename, 'w') as outfile:
-                json.dump(data, outfile, indent=4)
-        if event.name in names:
-            user_index = 0
-            for i in range(0, len(data['events'])):
-                if data['events'][i]['name'] == event.name:
-                    user_index = i
-                    break
-            data['events'][user_index] = event_schema
-            with open(filename, 'w') as outfile:
-                json.dump(data, outfile, indent=4)
-
-
-def load_event(name, filename="events.json"):
-    """
-    Loads the Event from a JSON representation.
-    :param name: The name of the Event object to be loaded from JSON (corresponds with the `Item.name` parameter).
-    :param filename: The filename for the events storage file; `events.json` is the default.
-    """
-    if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        raise IOError("The item definitions file" + filename + "  appears to be missing!")
-    list_of_items = json.load(open(filename))['events']
-    for item in list_of_items:
-        if item['name'] != name:
-            continue
+        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+            new_file_schema = {
+                "events":
+                    [event_schema]
+            }
+            f = open(filename, 'w')
+            f.write(json.dumps(new_file_schema, indent=4))
+            f.close()
         else:
-            event = Event(name, item['description'])
-            event.model = load_concept_model_from_data(item['model'])
-            event.start_time = item['start_time']
-            event.end_time = item['end_time']
-            event.location = item['location']
-            event.url = item['url']
-            event.picture = ['picture']
-            return event
-    raise IOError("The item " + name + "was not found!")
+            data = json.load(open(filename))
+            names = [event['name'] for event in data['events']]
+            if self.name not in names:
+                data['events'].append(event_schema)
+                with open(filename, 'w') as outfile:
+                    json.dump(data, outfile, indent=4)
+            if self.name in names:
+                user_index = 0
+                for i in range(0, len(data['events'])):
+                    if data['events'][i]['name'] == self.name:
+                        user_index = i
+                        break
+                data['events'][user_index] = event_schema
+                with open(filename, 'w') as outfile:
+                    json.dump(data, outfile, indent=4)
+
+    def load_event(self, filename="events.json"):
+        """
+        Loads the Event from a JSON representation.
+        :param filename: The filename for the events storage file; `events.json` is the default.
+        """
+        if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
+            raise IOError("The item definitions file" + filename + "  appears to be missing!")
+        list_of_items = json.load(open(filename))['events']
+        for item in list_of_items:
+            if item['name'] != self.name:
+                continue
+            else:
+                event = Event(self.name, item['description'])
+                event.model.load_from_data(item['model'])
+                event.start_time = item['start_time']
+                event.end_time = item['end_time']
+                event.location = item['location']
+                event.url = item['url']
+                event.picture = ['picture']
+                return event
+        raise IOError("The item " + name + "was not found!")
