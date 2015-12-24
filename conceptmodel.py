@@ -1,6 +1,7 @@
 from node import Node
 import networkx as nx
 import event_insight_lib
+from networkx.readwrite import json_graph
 
 
 class ConceptModel:
@@ -122,7 +123,6 @@ class ConceptModel:
     def augment_by_node(self, node, level=0, limit=20):
         """
         Augments the ConceptModel by mining the given node and adding newly discovered nodes to the resultant graph.
-
         :param node -- The node to be expanded. Note that this node need not already be present in the graph.
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
@@ -146,7 +146,6 @@ class ConceptModel:
         Augments the ConceptModel by assigning the given node to a concept and adding newly discovered nodes to the
         resultant graph. This method is an externally-facing wrapper for the internal `augment_by_node()` method:
         the difference is that this method maps a concept while that method maps a node.
-
         :param concept -- The concept to be expanded. Note that this concept need not already be present in the graph.
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
@@ -159,7 +158,6 @@ class ConceptModel:
     def abridge_by_node(self, node, level=0, limit=20):
         """
         Performs the inverse operation of augment by removing the expansion of the given node from the graph.
-
         :param node -- The node to be abridged. Note that this node need not already be present in the graph.
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
@@ -177,7 +175,6 @@ class ConceptModel:
         Performs the inverse operation of augment by removing the expansion of the given concept from the graph.
         This method is an externally-facing wrapper for the internal `abridge_by_node()` method: the difference is
         that this method maps a concept while that method maps a node.
-
         :param concept -- The concept to be expanded. Note that this concept need not already be present in the graph.
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
@@ -191,7 +188,6 @@ class ConceptModel:
         """
         Explodes a graph by augmenting every concept already in it. Warning: for sufficiently large graphs this is a
         very slow operation! See also the expand() method for a more focused version of this operation.
-
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
         parameter is a parameter that is passed directly to the IBM Watson API call.
@@ -205,7 +201,6 @@ class ConceptModel:
         """
         Expands a graph by augmenting concepts with only one (or no) edge. Warning: for sufficiently large graphs this
         is a slow operation! See also the expand() method for a less focused version of this operation.
-
         :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
         most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
         parameter is a parameter that is passed directly to the IBM Watson API call.
@@ -236,11 +231,6 @@ def model(user_input):
     Models arbitrary user input and returns an associated ConceptModel.
     :param user_input: Arbitrary input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (e.g.
     "the iPhone 5C, released this Thursday..." -> iPhone).
-    :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
-    most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-    parameter is a parameter that is passed directly to the IBM Watson API call.
-    :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
-    directly to the IBM Watson API call.
     :return: The constructed `ConceptModel` object. Might be empty!
     """
     new_model = ConceptModel()
@@ -253,30 +243,33 @@ def model(user_input):
 
 def convert_concept_model_to_data(concept_model):
     """
-    Returns the JSON representation of a ConceptModel. Counter-operation to load_from_dict().
+    Returns the JSON representation of a ConceptModel. Counter-operation to `load_from_dict()`.
     :param concept_model: A ConceptModel.
     :return: The nx dictionary representation of the ConceptModel.
     """
-    model_schema = []
-    for concept_node in concept_model.nodes():
-        model_schema.append({'concept': concept_node.concept,
-                             'view_count': concept_node.view_count,
-                             'relevance': concept_node.relevance})
-    concept_model_schema = {'maturity': concept_model.maturity, 'graph': model_schema}
-    return concept_model_schema
+    # Flatten the graph.
+    tuple_map = [(node, node.hacky_str_rpr()) for node in concept_model.nodes()]
+    # tuple_map = [(node, node.concept) for node in concept_model.nodes()]
+    dict_map = {map_tuple[0]: map_tuple[1] for map_tuple in tuple_map}
+    flattened_model = nx.relabel_nodes(concept_model.graph, dict_map)
+    # return json_graph.node_link_data(concept_model.graph)
+    return json_graph.node_link_data(flattened_model)
 
 
 def load_concept_model_from_data(data):
     """
-    Generates a ConceptModel out of a JSON representation. Counter-operation to convert_concept_to_dict().
+    Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
     :param data: The dictionary being passed to the method.
     :return: The generated ConceptModel.
     """
-    concept_model = ConceptModel()
-    concept_model.maturity = data['maturity']
-    for concept_data in data['graph']:
-        new_concept = Node(concept=concept_data['concept'])
-        new_concept.view_count = concept_data['view_count']
-        new_concept.relevance = concept_data['relevance']
-        concept_model.add(new_concept)
-    return concept_model
+    graph = json_graph.node_link_graph(data)
+    ret = ConceptModel()
+    ret.graph = graph
+    hacky_attribute_tuples = [tuple(node.split("_")) for node in graph.nodes()]
+    unflattened_nodes = []
+    for hacky_attribute_tuple in hacky_attribute_tuples:
+        new_node = Node(hacky_attribute_tuple[0])
+        new_node.relevance = hacky_attribute_tuple[1]
+        new_node.view_count = hacky_attribute_tuple[2]
+        unflattened_nodes.append(new_node)
+    # At this point we have a list of unflattened Node objects. Now we must map these to corresponding objects.
