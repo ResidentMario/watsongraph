@@ -221,6 +221,34 @@ class ConceptModel:
                     concept_node.concept).relevance) / 2)
         return overlapping_concept_nodes
 
+    def save(self):
+        # TODO: This method works by mapping to e.g. IBM_0.981_1982 concatenations. Super hack. Redo this properly.
+        """
+        Returns the JSON representation of a ConceptModel. Counter-operation to `load_from_dict()`.
+        :param self: A ConceptModel.
+        :return: The nx dictionary representation of the ConceptModel.
+        """
+        # Generate the flattening map.
+        tuple_map = [(node, node.hacky_str_rpr()) for node in self.nodes()]
+        dict_map = {map_tuple[0]: map_tuple[1] for map_tuple in tuple_map}
+        # Flatten the graph.
+        flattened_model = nx.relabel_nodes(self.graph, dict_map)
+        return json_graph.node_link_data(flattened_model)
+
+    def load(self, data):
+        # TODO: As above, but backwards. Need to redo this properly.
+        """
+        Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
+        :param data: The dictionary being passed to the method.
+        :return: The generated ConceptModel.
+        """
+        # Generate the un-flattening map.
+        self.graph = json_graph.node_link_graph(data)
+        dict_map = {node : Node(node.split("_")[0], relevance=node.split("_")[1], view_count=node.split("_")[2]) for node
+                    in self.nodes()}
+        # Un-flatten the graph and return it.
+        self.graph = nx.relabel_nodes(self.graph, dict_map)
+
 
 #######################
 # Read/write methods. #
@@ -239,37 +267,3 @@ def model(user_input):
     for label in new_labels:
         new_model.add(label)
     return new_model
-
-
-def convert_concept_model_to_data(concept_model):
-    """
-    Returns the JSON representation of a ConceptModel. Counter-operation to `load_from_dict()`.
-    :param concept_model: A ConceptModel.
-    :return: The nx dictionary representation of the ConceptModel.
-    """
-    # Flatten the graph.
-    tuple_map = [(node, node.hacky_str_rpr()) for node in concept_model.nodes()]
-    # tuple_map = [(node, node.concept) for node in concept_model.nodes()]
-    dict_map = {map_tuple[0]: map_tuple[1] for map_tuple in tuple_map}
-    flattened_model = nx.relabel_nodes(concept_model.graph, dict_map)
-    # return json_graph.node_link_data(concept_model.graph)
-    return json_graph.node_link_data(flattened_model)
-
-
-def load_concept_model_from_data(data):
-    """
-    Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
-    :param data: The dictionary being passed to the method.
-    :return: The generated ConceptModel.
-    """
-    graph = json_graph.node_link_graph(data)
-    ret = ConceptModel()
-    ret.graph = graph
-    hacky_attribute_tuples = [tuple(node.split("_")) for node in graph.nodes()]
-    unflattened_nodes = []
-    for hacky_attribute_tuple in hacky_attribute_tuples:
-        new_node = Node(hacky_attribute_tuple[0])
-        new_node.relevance = hacky_attribute_tuple[1]
-        new_node.view_count = hacky_attribute_tuple[2]
-        unflattened_nodes.append(new_node)
-    # At this point we have a list of unflattened Node objects. Now we must map these to corresponding objects.
