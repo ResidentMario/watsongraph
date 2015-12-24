@@ -10,11 +10,6 @@ class ConceptModel:
     """
 
     """
-    The maturity of the model, measured as a function of the number of nodes in the graph.
-    """
-    maturity = 0
-
-    """
     The model itself is stored in the form of a `networkx.Graph` directed graph.
     """
     graph = None
@@ -32,17 +27,10 @@ class ConceptModel:
                 mixin_concept = Node(concept_label)
                 self.graph.add_node(mixin_concept)
         # Set the maturity of the resultant model.
-        self.set_maturity()
 
     ###################################
     # Setters, getters, and printers. #
     ###################################
-
-    def set_maturity(self):
-        """
-        Wrapper method which recalculates the model's maturity.
-        """
-        self.maturity = self.graph.number_of_nodes()
 
     def print_edges(self):
         """
@@ -183,7 +171,6 @@ class ConceptModel:
         inverse.augment_by_node(node, level=level, limit=limit)
         for concept_node in [node for node in self.nodes() if node in inverse.graph.nodes()]:
             self.graph.remove_node(concept_node)
-        self.set_maturity()
 
     def abridge(self, concept, level=0, limit=20):
         """
@@ -244,7 +231,7 @@ class ConceptModel:
 # Read/write methods. #
 #######################
 
-def model(user_input, level=0, limit=20):
+def model(user_input):
     """
     Models arbitrary user input and returns an associated ConceptModel.
     :param user_input: Arbitrary input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (e.g.
