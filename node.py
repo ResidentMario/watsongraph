@@ -93,4 +93,4 @@ def conceptualize(user_input):
     # If the correction call is successful, keep going.
     if 'annotations' in raw_concepts.keys() and len(raw_concepts['annotations']) != 0:
         matched_concept_node_label = raw_concepts['annotations'][0]['concept']['label']
-        return Node(matched_concept_node_label)
+        return matched_concept_node_label

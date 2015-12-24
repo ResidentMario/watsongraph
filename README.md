@@ -98,7 +98,7 @@ statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)'
 'Statistics', 'Vector space']
 ```
 
-`edges()` presents us with a list of the `concept, concept, correlation` tuples associated with the model:
+`edges()` presents us with a list of the `(concept, concept, correlation)` tuples associated with the model:
 
 ```
 >>> stochastic_topics.edges()
@@ -112,7 +112,44 @@ statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)'
 ]
 ```
 
-Analysis tools are in continued development.
+Use the `model()` method to map entire strings to new `ConceptMap` objects.
+
+```
+>>> from conceptmodel import model
+>>> new_model = model("When applied, the probabilities involved in Bayes' theorem may have different probability
+interpretations. In one of these interpretations, the theorem is used directly as part of a particular approach to
+statistical inference. With the Bayesian probability interpretation the theorem expresses how a subjective degree of
+ belief should rationally change to account for evidence: this is Bayesian inference, which is fundamental to
+ Bayesian statistics. However, Bayes' theorem has applications in a wide range of calculations involving pr
+ obabilities, not just in Bayesian inference.")
+>>> new_model.concepts()
+
+["Bayes' theorem", 'Bayesian inference', 'Bayesian probability', 'Bayesian statistics', 'Interpretation (logic)',
+'Probability', 'Probability interpretations', 'Rationality', 'Statistical inference', 'Theorem']
+```
+
+
+**Important caveat**: Every concept is associated with the name of a Wikipedia article, so it's important to make sure
+that any concepts
+you attempt to plug into your model directly correspond exactly with the titles of their corresponding articles. For
+example, Wikipedia has a page for `Bayes' theorem` - but not for `Bayes' Theorem` or for `Bayes' law`. Thus calling
+`stochastic_topics.add("Bayes' law")` would work but would cause problems down the line. Instead if you are inputting
+ a concept label that is reasonably close to the correct one you can explicitly run it through Watson again to map
+ it directly:
+
+```
+>>> from node import conceptualize
+>>> conceptualize("Bayes' theorem")
+'Bayes' theorem'
+>>> conceptualize("Bayes' law")
+'Bayes' theorem'
+>>> conceptualize("Bayes")
+'Thomas Bayes'
+>>> conceptualize("Met")
+'Metropolitan Opera'
+>>> conceptualize("Smithsonian Museum")
+'Smithsonian Institution'
+```
 
 ### User modeling
 
