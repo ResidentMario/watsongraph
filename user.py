@@ -1,7 +1,7 @@
 import os
 import json
 from conceptmodel import ConceptModel
-from concept import map_user_input_to_concept
+from node import conceptualize
 from conceptmodel import convert_concept_model_to_data, load_concept_model_from_data
 
 
@@ -33,13 +33,13 @@ class User:
         """
         :return: The Concept() objects associated with the user's model.
         """
-        return self.model.concepts()
+        return self.model.nodes()
 
     def labels(self):
         """
         :return: The labels of the concepts associated with the user's model.
         """
-        return self.model.labels()
+        return self.model.concepts()
 
     def interest_in(self, item):
         """
@@ -93,10 +93,10 @@ class User:
         :param interest: Arbitrary user input.
         """
         # TODO: Model math.
-        mapped_concept = map_user_input_to_concept(interest)
+        mapped_concept = conceptualize(interest)
         if mapped_concept:
             mapped_model = ConceptModel()
-            mapped_model.add(mapped_concept)
+            mapped_model.graph.add_node(mapped_concept)
             mapped_model.explode()
             self.model.merge_with(mapped_model)
 

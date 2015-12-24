@@ -4,3 +4,4 @@ networkx
 requests
 # The following packages are not avaiable to Conda and must be pip-installed:
 # mwviews
+# tinydb

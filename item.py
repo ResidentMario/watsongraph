@@ -1,5 +1,5 @@
 from conceptmodel import ConceptModel
-from concept import Concept
+from node import Node
 import os
 import json
 import event_insight_lib
@@ -40,22 +40,22 @@ class Item:
             related_concepts_raw = event_insight_lib.annotate_text(self.description)
             new_labels = [raw_concept['concept']['label'] for raw_concept in related_concepts_raw['annotations']]
             for label in new_labels:
-                self.model.add(Concept(label))
+                self.model.add(Node(label))
             # Set the relevance parameters of the underlying Concepts to 1.0 to start off with.
-            for concept in self.model.concepts():
+            for concept in self.model.nodes():
                 concept.relevance = 1
 
     def concepts(self):
         """
         :return: The concepts in the Item model.
         """
-        return self.model.concepts()
+        return self.model.nodes()
 
     def labels(self):
         """
         :return: The labels for the concepts in the Item model.
         """
-        return self.model.labels()
+        return self.model.concepts()
 
 #######################
 # Read/write methods. #

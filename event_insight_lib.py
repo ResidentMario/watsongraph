@@ -23,7 +23,7 @@ def import_credentials(filename='concept_insight_credentials.json'):
         return data
     else:
         raise IOError(
-            'FATAL ERROR: This API requires a Bluemix/Watson credentials token to work. Did you forget to define '
+            'This API requires a Bluemix/Watson credentials token to work. Did you forget to define '
             'one? For more information refer to:\n\nhttps://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud'
             '/doc/getting_started/gs-credentials.shtml')
 
@@ -49,7 +49,7 @@ def generate_token(filename='concept_insight_credentials.json', tokenfile='token
         return r.text
     else:
         raise RuntimeError(
-            'FATAL ERROR: Could not resolve a Bluemix/Watson API token using the given credentials.' +
+            'Could not resolve a Bluemix/Watson API token using the given credentials.' +
             'Are your account credentials correct?')
 
 

@@ -62,41 +62,54 @@ Here's a peek at what we can do.
 Let's populate a simple conceptual graph.
 
 ```
->>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk', 'Brownian motion'])
-```
+>>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk']
+>>> stochastic_topics.add('Brownian motion')
+>>> stochastic_topics.concepts()
 
-Note that this only adds exactly those nodes to the graphs.
-
-```
->>> stochastic_topics.labels()
 ['Brownian motion', 'Markov chain', 'Random walk']
 ```
 
-To extrapolate forward from this we can `explode()` our graph.
+To extrapolate forward from this we can `explode()` our graph. This expands every concept in the model.
 
 ```
 >>> stochastic_topics.explode()
->>> stochastic_topics.labels()
+>>> stochastic_topics.concepts()
 
-['Brownian motion', 'Continuous function', 'Eigenvalues and eigenvectors', 'Function (mathematics)', 'Graph theory',
- 'Integral', 'List of statistics articles', 'Markov chain', 'Matrix (mathematics)', 'Normal distribution',
- 'Probability', 'Probability distribution', 'Quantum field theory', 'Random walk', 'Real number', 'Statistics']
+['Albert Einstein', 'Algorithm', 'Bioinformatics', 'Brownian motion', 'Complex number', 'Continuous function',
+'Eigenvalues and eigenvectors', 'Fluid dynamics', 'Function (mathematics)', 'General relativity', 'Graph theory',
+'Group (mathematics)', 'Index of physics articles', 'Integer', 'Integral', 'List of people by Erd\u0151s number',
+'List of statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)', 'Natural number', 'Normal
+ distribution', 'Polynomial', 'Probability', 'Probability distribution', 'Quantum field theory', 'Quantum
+ mechanics', 'Random walk', 'Real number', 'Statistics', 'Thermodynamics', 'Vector space', 'Viscosity']
 ```
 
-We can also use `expand` to focus-expand only those nodes that have less than some number `n` existing edges.
-
-Speaking of edges...
+We can also choose to `augment()` only a specific concept. This will explode only that concept and add it to the
+graph. The concept we choose to `augment()` does not necessarily already have to be in the graph.
 
 ```
->>> stochastic_topics.print_edges()
+>>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk', 'Brownian motion'])
+>>> stochastic_topics.augment('Random walk')
+>>> stochastic_topics.concepts()
 
-1: Probability distribution <-> Brownian motion
-2: Probability distribution <-> Markov chain
-3: Probability distribution <-> Random walk
-4: Integral <-> Brownian motion
-5: Matrix (mathematics) <-> Markov chain
-6: Matrix (mathematics) <-> Random walk
-...[snipped for brevity]...
+['Brownian motion', 'Complex number', 'Continuous function', 'Eigenvalues and eigenvectors', 'Function (mathematics)
+', 'Graph theory', 'Group (mathematics)', 'Integer', 'Integral', 'List of people by Erd\u0151s number', 'List of
+statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)', 'Normal distribution',
+'Polynomial', 'Probability', 'Probability distribution', 'Quantum field theory', 'Random walk', 'Real number',
+'Statistics', 'Vector space']
+```
+
+`edges()` presents us with a list of the `concept, concept, correlation` tuples associated with the model:
+
+```
+>>> stochastic_topics.edges()
+
+[('Probability distribution', "Bayes' theorem", 0.9638752),
+ ('Integral', "Bayes' theorem", 0.6774791),
+ ("Bayes' theorem", 'Statistics', 0.8829379),
+ ("Bayes' theorem", 'Artificial intelligence', 0.61295384),
+ ("Bayes' theorem", 'Real number', 0.7393193),
+ ...[snipped for brevity]...
+]
 ```
 
 Analysis tools are in continued development.
