@@ -37,20 +37,16 @@ class ConceptModel:
         """
         Edge pretty-printing method that's useful for debugging.
         """
-        n = 1
-        for edge in self.graph.edges():
-            print(str(n) + ': ' + edge[0].concept + ' <- ' + str(self.graph.edge[edge[0]][edge[1]]['weight']) + ' -> ' +
-                  edge[1].concept)
-            n += 1
+        for index, edge in enumerate(self.graph.edges()):
+            print(index, edge[0].concept + ' <- ' + str(self.graph.edge[edge[0]][edge[1]]['weight']) + ' -> ' + edge[
+                1].concept)
 
     def print_nodes(self):
         """
         Node pretty-printing method that's useful for debugging.
         """
-        n = 1
-        for node in self.nodes():
-            print(str(n) + ': ' + node.concept)
-            n += 1
+        for index, node in enumerate(self.nodes()):
+            print(index, node.concept)
 
     def nodes(self):
         """
