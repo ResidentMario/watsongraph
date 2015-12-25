@@ -1,4 +1,5 @@
 networkx
 requests
 mwviews
-tinydb
+# tinydb
+graphistry

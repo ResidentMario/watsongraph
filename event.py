@@ -44,7 +44,7 @@ class Event(Item):
         """
         event_schema = {
             "name": self.name,
-            "model": self.model.to_data(),
+            "model": self.model.to_json(),
             "description": self.description,
             "start_time": self.start_time,
             "end_time": self.end_time,
@@ -90,7 +90,7 @@ class Event(Item):
                 continue
             else:
                 event = Event(self.name, item['description'])
-                event.model.load_from_data(item['model'])
+                event.model.load_from_json(item['model'])
                 event.start_time = item['start_time']
                 event.end_time = item['end_time']
                 event.location = item['location']

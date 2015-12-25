@@ -119,7 +119,7 @@ class User:
         """
         user_schema = {
             "password": self.password,
-            "model": self.model.to_data(),
+            "model": self.model.to_json(),
             "id": self.id,
             "exceptions": self.exceptions
         }
@@ -168,7 +168,7 @@ class User:
                         break
                 user_data = data['accounts'][user_index]
                 user = User(user_id=self.id,
-                            model=self.model.load_from_data(user_data['model']),
+                            model=self.model.load_from_json(user_data['model']),
                             exceptions=user_data['exceptions'],
                             password=user_data['password']
                             )

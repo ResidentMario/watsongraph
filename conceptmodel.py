@@ -2,6 +2,9 @@ from node import Node
 import networkx as nx
 import event_insight_lib
 from networkx.readwrite import json_graph
+import graphistry
+import os
+import json
 
 
 class ConceptModel:
@@ -37,9 +40,10 @@ class ConceptModel:
         """
         Edge pretty-printing method that's useful for debugging.
         """
-        for index, edge in enumerate(self.graph.edges()):
-            print(index, edge[0].concept + ' <- ' + str(self.graph.edge[edge[0]][edge[1]]['weight']) + ' -> ' + edge[
-                1].concept)
+        sorted_edge_tuples = sorted([(self.graph.edge[edge[0]][edge[1]]['weight'], edge[0], edge[1]) for edge in
+                                    self.graph.edges()], reverse=True)
+        for index, edge_repr in enumerate(sorted_edge_tuples):
+            print(str(index), edge_repr[1].concept + ' <- ' + str(edge_repr[0]) + ' -> ' + edge_repr[2].concept)
 
     def print_nodes(self):
         """
@@ -217,42 +221,71 @@ class ConceptModel:
                     concept_node.concept).relevance) / 2)
         return overlapping_concept_nodes
 
-    def to_data(self):
-        # TODO: This method works by mapping to e.g. IBM_0.981_1982 concatenations. Super hack. Redo this properly.
+    def to_json(self):
         """
         Returns the JSON representation of a ConceptModel. Counter-operation to `load_from_dict()`.
         :param self: A ConceptModel.
         :return: The nx dictionary representation of the ConceptModel.
         """
-        # Generate the flattening map.
-        tuple_map = [(node, node.hacky_str_rpr()) for node in self.nodes()]
-        dict_map = {map_tuple[0]: map_tuple[1] for map_tuple in tuple_map}
-        # Flatten the graph.
-        flattened_model = nx.relabel_nodes(self.graph, dict_map)
-        return json_graph.node_link_data(flattened_model)
+        flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
+        data_repr = json_graph.node_link_data(flattened_model)
+        for node in data_repr['nodes']:
+            node['relevance'] = self.get_node(node['id']).relevance
+            node['view_count'] = self.get_node(node['id']).view_count
+        return data_repr
 
-    def load_from_data(self, data):
-        # TODO: As above, but backwards. Need to redo this properly.
+    def load_from_json(self, data_repr):
         """
         Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
-        :param data: The dictionary being passed to the method.
+        :param data_repr: The dictionary being passed to the method.
         :return: The generated ConceptModel.
         """
-        # Generate the un-flattening map.
-        self.graph = json_graph.node_link_graph(data)
-        dict_map = {node: Node(node.split("_")[0], relevance=node.split("_")[1], view_count=node.split("_")[2]) for
-                    node in self.nodes()}
-        # Un-flatten the graph and return it.
-        self.graph = nx.relabel_nodes(self.graph, dict_map)
+        flattened_model = json_graph.node_link_graph(data_repr)
+        self.graph = ConceptModel([node for node in flattened_model.nodes()]).graph
+        for node in data_repr['nodes']:
+            self.get_node(node['id']).relevance = node['relevance']
+            self.get_node(node['id']).view_count = node['view_count']
+
+    def visualize(self, filename='graphistry_credentials.json'):
+        """
+        Generates a ConceptModel visualization. WIP. Need to get a graphistry key first...
+        :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
+        `graphistry_credentials.json`.
+        :return: The generated visualization.
+        """
+        graphistry_token = import_graphistry_credentials()
+        graphistry.register(key=graphistry_token)
+        flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
+        graphistry.bind(source='src', destination='dst', node='nodeid').plot(flattened_model)
 
 
-#######################
-# Read/write methods. #
-#######################
+def import_graphistry_credentials(filename='graphistry_credentials.json'):
+    """
+    Internal method which finds the credentials file describing the token that's needed to access Graphistry
+    services. Graphistry is an alpha-level in-development backend that is used here for visualizing the
+    ConceptModel, so keys are given out on a per-user basis; see https://github.com/graphistry/pygraphistry for more
+    information.
+
+    See also `event_insight_lib.import_credentials()`, which replicates this operation for the (required) Concept
+    Insights API service key.
+
+    :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
+    `graphistry_credentials.json`.
+    """
+    if filename in [f for f in os.listdir('.') if os.path.isfile(f)]:
+        return json.load(open(filename))['credentials']['key']
+    else:
+        raise IOError(
+            'The visualization methods that come with the watson-graph library require a Graphistry credentials '
+            'token to work. Did you forget to define one? For more information refer '
+            'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
+
 
 def model(user_input):
     """
-    Models arbitrary user input and returns an associated ConceptModel.
+    Models arbitrary user input and returns an associated ConceptModel. See also the similar `concept.conceptualize`
+    static method, which binds arbitrary input to a single concept label instead.
+
     :param user_input: Arbitrary input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (e.g.
     "the iPhone 5C, released this Thursday..." -> iPhone).
     :return: The constructed `ConceptModel` object. Might be empty!

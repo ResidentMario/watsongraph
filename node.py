@@ -1,6 +1,7 @@
 from mwviews.api import PageviewsClient
 import hashlib
 import event_insight_lib
+import json
 
 
 class Node:
@@ -70,23 +71,11 @@ class Node:
         """
         return int(hashlib.md5(self.concept.encode()).hexdigest(), 16)
 
-    # def dict_repr(self):
-    #     """
-    #     Makes this object JSON serializable.
-    #     """
-    #     return {
-    #         'concept': self.concept,
-    #         'view_count': self.view_count,
-    #         'relevance': self.relevance
-    #     }
-    #
-    # def list_repr(self):
-    #     """
-    #     Makes this object JSON serializable.
-    #     """
-    #     return [self.concept, self.view_count, self.relevance]
-
     def hacky_str_rpr(self):
+        """
+        :return: A concatenated string representation used for ConceptModel data storage. See `conceptmodel.to_json()`,
+        `conceptmodel.load_from_json()`.
+        """
         return self.concept + '_' + str(self.relevance) + '_' + str(self.view_count)
 
     def set_view_count(self):
@@ -107,7 +96,9 @@ class Node:
 
 def conceptualize(user_input):
     """
-    Attempts to map arbitrary textual input to a valid Concept. If the method is unsuccessful no Concept is returned.
+    Attempts to map arbitrary textual input to a valid Concept. If the method is unsuccessful no Concept is
+    returned. See also the similar `conceptmodel.model` static method, which binds arbitrary input to an entire
+    ConceptModel instead.
     :param user_input: Arbitrary input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (e.g.
     "the iPhone 5C, released this Thursday..." -> iPhone).
     """
