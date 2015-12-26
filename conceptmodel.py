@@ -143,7 +143,7 @@ class ConceptModel:
         """
         self.graph = nx.compose(self.graph, mixin_concept_model.graph)
 
-    def augment_by_node(self, node, level=0, limit=20):
+    def augment_by_node(self, node, level=0, limit=50):
         """
         Augments the ConceptModel by mining the given node and adding newly discovered nodes to the resultant graph.
         :param node -- The node to be expanded. Note that this node need not already be present in the graph.
@@ -164,7 +164,7 @@ class ConceptModel:
                 mixin.graph.add_edge(self.get_node(node.concept), new_node, weight=raw_concept['score'])
         self.merge_with(mixin)
 
-    def augment(self, concept, level=0, limit=20):
+    def augment(self, concept, level=0, limit=50):
         """
         Augments the ConceptModel by assigning the given node to a concept and adding newly discovered nodes to the
         resultant graph. This method is an externally-facing wrapper for the internal `augment_by_node()` method:
@@ -178,7 +178,7 @@ class ConceptModel:
         """
         self.augment_by_node(Node(concept), level=level, limit=limit)
 
-    def abridge_by_node(self, node, level=0, limit=20):
+    def abridge_by_node(self, node, level=0, limit=50):
         """
         Performs the inverse operation of augment by removing the expansion of the given node from the graph.
         :param node -- The node to be abridged. Note that this node need not already be present in the graph.
@@ -193,7 +193,7 @@ class ConceptModel:
         for concept_node in [node for node in self.nodes() if node in inverse.graph.nodes()]:
             self.graph.remove_node(concept_node)
 
-    def abridge(self, concept, level=0, limit=20):
+    def abridge(self, concept, level=0, limit=50):
         """
         Performs the inverse operation of augment by removing the expansion of the given concept from the graph.
         This method is an externally-facing wrapper for the internal `abridge_by_node()` method: the difference is
@@ -207,7 +207,7 @@ class ConceptModel:
         """
         self.abridge_by_node(Node(concept), level=level, limit=limit)
 
-    def explode(self, level=0, limit=20):
+    def explode(self, level=0, limit=50):
         """
         Explodes a graph by augmenting every concept already in it. Warning: for sufficiently large graphs this is a
         very slow operation! See also the expand() method for a more focused version of this operation.
@@ -220,7 +220,7 @@ class ConceptModel:
         for concept_node in self.nodes():
             self.augment_by_node(concept_node, level=level, limit=limit)
 
-    def expand(self, level=0, limit=20, n=1):
+    def expand(self, level=0, limit=50, n=1):
         """
         Expands a graph by augmenting concepts with only one (or no) edge. Warning: for sufficiently large graphs this
         is a slow operation! See also the expand() method for a less focused version of this operation.
@@ -319,7 +319,8 @@ def model(user_input):
     new_model = ConceptModel()
     if user_input:
         related_concepts_raw = event_insight_lib.annotate_text(user_input)
-        new_labels = [raw_concept['concept']['label'] for raw_concept in related_concepts_raw['annotations']]
-        for label in new_labels:
-            new_model.add(label)
+        new_data = [(raw_concept['concept']['label'], raw_concept['score']) for raw_concept in
+                    related_concepts_raw['annotations']]
+        for data in new_data:
+            new_model.graph.add_node(Node(data[0], relevance=data[1]))
     return new_model

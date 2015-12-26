@@ -13,7 +13,7 @@ class User:
     model = None
     """The list of events that the user has already expressed interest or disinterest in is stored in their
     'exceptions' field, so as not to repeatedly return the same items to them."""
-    exceptions = None
+    exceptions = []
 
     def __init__(self, model=ConceptModel(), user_id='', exceptions=None, password=''):
         """
@@ -25,7 +25,8 @@ class User:
         """
         self.id = user_id
         self.model = model
-        self.exceptions = exceptions
+        if exceptions:
+            self.exceptions = exceptions
         self.password = password
 
     def nodes(self):
@@ -40,6 +41,12 @@ class User:
         """
         return self.model.concepts()
 
+    def interests(self):
+        """
+        :return: Returns (interest, concept) pair tuples associated with the user.
+        """
+        return sorted([(node.relevance, node.concept) for node in self.model.nodes()], reverse=True)
+
     def interest_in(self, item):
         """
         :param item: An Item object to be compared to.
@@ -50,62 +57,77 @@ class User:
         if len(intersection) == 0:
             return 0
         else:
-            # TODO: Improve the mathematics of this model.
-            return sum([concept_node.relevance for concept_node in intersection]) / len(intersection)
+            return sum([concept_node.relevance for concept_node in intersection])
 
-    def get_best_item(self, event_list):
+    def get_best_item(self, item_list):
         """
         Retrieves the event within a list of events which is most relevant to the given user's interests.
-        :param event_list: The list of Event objects to be examined.
+        :param item_list: The list of Event objects to be examined.
         :return: The Event which best matches the user's interests.
         """
-        best_event = None
+        best_item = None
         highest_relevance = 0.0
-        for event in event_list:
-            if self.interest_in(event) >= highest_relevance and event.label not in self.exceptions:
-                best_event = event
-        return best_event
+        for item in item_list:
+            if self.interest_in(item) >= highest_relevance and item.name not in self.exceptions:
+                best_item = item
+        return best_item
 
     def express_interest(self, item):
-        # TODO: Model math.
         """
         Merges interest in an event into the user model. Adds the Item in which interest has been expressed to the
         exceptions.
         :param item: Event object the user is expressing interest in.
         """
         self.model.merge_with(item.model)
+        # Raise correlated relevancies.
+        for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
+            self.model.get_node(concept).relevance = min(1.0, self.model.get_node(concept).relevance * 1.2)
+        # Bump down uncorrelated relevancies.
+        for concept in [concept for concept in item.concepts() if concept not in self.concepts()]:
+            concept.relevance *= 0.9
+        # Remove irrelevant concepts (to keep the model relatively clean).
+        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).relevance <= 0.2]:
+            self.model.remove(concept)
         self.exceptions.append(item.name)
 
     def express_disinterest(self, item):
-        # TODO: Model math.
         """
         Merges disinterest in an event into the user model. Adds the Item in which interest has been expressed to the
         exceptions.
         :param item: Event object the user is expressing disinterest in.
         """
         self.exceptions.append(item.name)
+        # Scale down overlapping concepts.
+        for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
+            self.model.get_node(concept).relevance *= 0.75
+        # Remove irrelevant concepts (to keep the model relatively clean).
+        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).relevance <= 0.2]:
+            self.model.remove(concept)
 
-    def input_interest(self, interest):
+    def input_interest(self, interest, level=0, limit=20):
         """
         Resolves arbitrary user input to concepts, explodes the resultant nodes, and adds the resultant graph to the
         user's present one.
         :param interest: Arbitrary user input.
         """
-        # TODO: Model math.
         mapped_concept = conceptualize(interest)
         if mapped_concept:
             mapped_model = ConceptModel([mapped_concept])
-            mapped_model.explode()
+            mapped_model.get_node(mapped_concept).relevance = 1.0
+            mapped_model.explode(level=level, limit=limit)
+            # Set relevancies based on edge weights.
+            for node in list(mapped_model.graph[mapped_model.get_node(mapped_concept)].keys()):
+                node.relevance = mapped_model.graph[mapped_model.get_node(mapped_concept)][node]['weight']
             self.model.merge_with(mapped_model)
 
-    def input_interests(self, interests):
+    def input_interests(self, interests, level=0, limit=20):
         """
         Resolves a series of arbitrary user inputs to concepts, explodes the resultant nodes, and adds the resultant
         graph to the user's present one.
         :param interests: Arbitrary user input.
         """
         for interest in interests:
-            self.input_interest(interest)
+            self.input_interest(interest, level=level, limit=limit)
 
     #######################
     # Read/write methods. #

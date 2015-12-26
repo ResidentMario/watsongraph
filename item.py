@@ -49,6 +49,12 @@ class Item:
         """
         return self.model.concepts()
 
+    def relevancies(self):
+        """
+        :return: Sorted (relevance, concept) pairs associated with the Item.
+        """
+        return sorted([(node.relevance, node.concept) for node in self.nodes()], reverse=True)
+
     def to_json(self):
         """
         Returns a JSON of the Item object suitable for storage. Counter-operation to `load_from_json()`.
