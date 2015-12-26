@@ -1,7 +1,6 @@
 from mwviews.api import PageviewsClient
 import hashlib
-import event_insight_lib
-import json
+import watsongraph.event_insight_lib
 
 
 class Node:
@@ -103,7 +102,7 @@ def conceptualize(user_input):
     "the iPhone 5C, released this Thursday..." -> iPhone).
     """
     # Fetch the precise name of the node (article title) associated with the institution.
-    raw_concepts = event_insight_lib.annotate_text(user_input)
+    raw_concepts = watsongraph.event_insight_lib.annotate_text(user_input)
     # If the correction call is successful, keep going.
     if 'annotations' in raw_concepts.keys() and len(raw_concepts['annotations']) != 0:
         matched_concept_node_label = raw_concepts['annotations'][0]['concept']['label']

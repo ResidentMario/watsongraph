@@ -1,7 +1,7 @@
 import os
 import json
-from conceptmodel import ConceptModel
-from node import conceptualize
+from watsongraph.conceptmodel import ConceptModel
+from watsongraph.node import conceptualize
 
 
 class User:

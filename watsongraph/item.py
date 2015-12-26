@@ -1,7 +1,7 @@
 import os
 import json
-from conceptmodel import ConceptModel
-from conceptmodel import model as model_input
+from watsongraph.conceptmodel import ConceptModel
+from watsongraph.conceptmodel import model as model_input
 
 # Every augmentation is the ConceptModel of a new user-indicated Item of interest. I have to come up with some sort
 # of mathematically justified way of merging this new Item into the old model: decaying the old nodes and reinforcing

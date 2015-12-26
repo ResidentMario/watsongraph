@@ -1,6 +1,6 @@
-from node import Node
+from watsongraph.node import Node
 import networkx as nx
-import event_insight_lib
+import watsongraph.event_insight_lib
 from networkx.readwrite import json_graph
 # import graphistry
 # import os
@@ -155,7 +155,7 @@ class ConceptModel:
         directly to the IBM Watson API call.
         """
         mixin = ConceptModel()
-        related_concepts_raw = event_insight_lib.get_related_concepts(node.concept, level=level, limit=limit)
+        related_concepts_raw = watsongraph.event_insight_lib.get_related_concepts(node.concept, level=level, limit=limit)
         if node not in self.nodes():
             self.graph.add_node(node)
         for raw_concept in related_concepts_raw['concepts']:
@@ -295,8 +295,8 @@ class ConceptModel:
 #     ConceptModel, so keys are given out on a per-user basis; see https://github.com/graphistry/pygraphistry for more
 #     information.
 #
-#     See also `event_insight_lib.import_credentials()`, which replicates this operation for the (required) Concept
-#     Insights API service key.
+#     See also `watsongraph.event_insight_lib.import_credentials()`, which replicates this operation for the (
+# required) Concept Insights API service key.
 #
 #     :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
 #     `graphistry_credentials.json`.
@@ -321,7 +321,7 @@ def model(user_input):
     """
     new_model = ConceptModel()
     if user_input:
-        related_concepts_raw = event_insight_lib.annotate_text(user_input)
+        related_concepts_raw = watsongraph.event_insight_lib.annotate_text(user_input)
         new_data = [(raw_concept['concept']['label'], raw_concept['score']) for raw_concept in
                     related_concepts_raw['annotations']]
         for data in new_data:
