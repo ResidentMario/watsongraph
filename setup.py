@@ -4,7 +4,7 @@ setup(
   packages = ['watsongraph'], # this must be the same as the name above
   install_requires=['networkx', 'requests', 'mwviews'],
   version = '0.1.5',
-  description = 'Concept discovery and recommendation library built on top of the IBM Watson congitive API.',
+  description = 'Concept discovery and recommendation library built on top of the IBM Watson cognitive API.',
   author = 'Aleksey Bilogur',
   author_email = 'aleksey.bilogur@gmail.com',
   url = 'https://github.com/ResidentMario/watsongraph/tarball/0.1.5',
