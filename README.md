@@ -54,7 +54,7 @@ based on topical connections between articles generated not by "dumb" links betw
 learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
 development today.
 
-For a peek at what we can do check out the [demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20ConceptModel%20demo.ipynb)
+For a peek at what you can do check out the [demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20ConceptModel%20demo.ipynb)
 in this repository.
 
 ### User modeling
@@ -63,4 +63,11 @@ This library provides basic but durable and highly extendible facilities for con
 Insights -based user recommendation service. The two classes of interest provided here are `User` and `Item`.
 `ConceptModel` objects are implicit in both of these classes but have been elegantly abstracted away from.
 
-For a peek at what you can do check out the other demo notebook in this repository
+For a peek at what you can do check out the [other demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20User%20Modeling%20Demo.ipynb)
+in this repository.
+
+Refer to the [Cultural Insight](https://github.com/ResidentMario/cultural-insight) repository for a complete web
+application using this library in this manner.
+
+You can also try out the IBM [trial application](https://concept-insights-demo.mybluemix.net/) which, though it
+doesn't use this code, in no small part inspired it!
