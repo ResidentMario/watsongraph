@@ -51,3 +51,6 @@ model_test.py
 io_test.py
 test.py
 lesmiserables.csv
+
+# Extension
+event.py
