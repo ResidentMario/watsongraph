@@ -189,9 +189,11 @@ class User:
                         user_index = i
                         break
                 user_data = data['accounts'][user_index]
-                self.id = user_data.id
+                self.id = user_data['id']
                 self.model.load_from_json(user_data['model'])
                 self.exceptions = user_data['exceptions']
+                if not self.exceptions:
+                    self.exceptions = []
                 self.password = user_data['password']
 
     def update_user_credentials(self, filename='accounts.json'):
