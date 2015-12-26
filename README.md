@@ -54,103 +54,8 @@ based on topical connections between articles generated not by "dumb" links betw
 learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
 development today.
 
-Here's a peek at what we can do.
-
-```
->>> from conceptmodel import ConceptModel
-```
-
-Let's populate a simple conceptual graph.
-
-```
->>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk']
->>> stochastic_topics.add('Brownian motion')
->>> stochastic_topics.concepts()
-
-['Brownian motion', 'Markov chain', 'Random walk']
-```
-
-To extrapolate forward from this we can `explode()` our graph. This expands every concept in the model.
-
-```
->>> stochastic_topics.explode()
->>> stochastic_topics.concepts()
-
-['Albert Einstein', 'Algorithm', 'Bioinformatics', 'Brownian motion', 'Complex number', 'Continuous function',
-'Eigenvalues and eigenvectors', 'Fluid dynamics', 'Function (mathematics)', 'General relativity', 'Graph theory',
-'Group (mathematics)', 'Index of physics articles', 'Integer', 'Integral', 'List of people by Erd\u0151s number',
-'List of statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)', 'Natural number', 'Normal
- distribution', 'Polynomial', 'Probability', 'Probability distribution', 'Quantum field theory', 'Quantum
- mechanics', 'Random walk', 'Real number', 'Statistics', 'Thermodynamics', 'Vector space', 'Viscosity']
-```
-
-We can also choose to `augment()` only a specific concept. This will explode only that concept and add it to the
-graph. The concept we choose to `augment()` does not necessarily already have to be in the graph.
-
-```
->>> stochastic_topics = ConceptModel(['Markov chain', 'Random walk', 'Brownian motion'])
->>> stochastic_topics.augment('Random walk')
->>> stochastic_topics.concepts()
-
-['Brownian motion', 'Complex number', 'Continuous function', 'Eigenvalues and eigenvectors', 'Function (mathematics)
-', 'Graph theory', 'Group (mathematics)', 'Integer', 'Integral', 'List of people by Erd\u0151s number', 'List of
-statistics articles', 'List of theorems', 'Markov chain', 'Matrix (mathematics)', 'Normal distribution',
-'Polynomial', 'Probability', 'Probability distribution', 'Quantum field theory', 'Random walk', 'Real number',
-'Statistics', 'Vector space']
-```
-
-`edges()` presents us with a list of the `(concept, concept, correlation)` tuples associated with the model:
-
-```
->>> stochastic_topics.edges()
-
-[('Probability distribution', "Bayes' theorem", 0.9638752),
- ('Integral', "Bayes' theorem", 0.6774791),
- ("Bayes' theorem", 'Statistics', 0.8829379),
- ("Bayes' theorem", 'Artificial intelligence', 0.61295384),
- ("Bayes' theorem", 'Real number', 0.7393193),
- ...[snipped for brevity]...
-]
-```
-
-Use the `model()` method to map entire strings to new `ConceptMap` objects.
-
-```
->>> from conceptmodel import model
->>> new_model = model("When applied, the probabilities involved in Bayes' theorem may have different probability
-interpretations. In one of these interpretations, the theorem is used directly as part of a particular approach to
-statistical inference. With the Bayesian probability interpretation the theorem expresses how a subjective degree of
- belief should rationally change to account for evidence: this is Bayesian inference, which is fundamental to
- Bayesian statistics. However, Bayes' theorem has applications in a wide range of calculations involving pr
- obabilities, not just in Bayesian inference.")
->>> new_model.concepts()
-
-["Bayes' theorem", 'Bayesian inference', 'Bayesian probability', 'Bayesian statistics', 'Interpretation (logic)',
-'Probability', 'Probability interpretations', 'Rationality', 'Statistical inference', 'Theorem']
-```
-
-
-**Important caveat**: Every concept is associated with the name of a Wikipedia article, so it's important to make sure
-that any concepts
-you attempt to plug into your model directly correspond exactly with the titles of their corresponding articles. For
-example, Wikipedia has a page for `Bayes' theorem` - but not for `Bayes' Theorem` or for `Bayes' law`. Thus calling
-`stochastic_topics.add("Bayes' law")` would work but would cause problems down the line. Instead if you are inputting
- a concept label that is reasonably close to the correct one you can explicitly run it through Watson to sanitize
- the input and make it safe for use:
-
-```
->>> from node import conceptualize
->>> conceptualize("Bayes' theorem")
-'Bayes' theorem'
->>> conceptualize("Bayes' law")
-'Bayes' theorem'
->>> conceptualize("Bayes")
-'Thomas Bayes'
->>> conceptualize("Met")
-'Metropolitan Opera'
->>> conceptualize("Smithsonian Museum")
-'Smithsonian Institution'
-```
+For a peek at what we can do check out the [demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20ConceptModel%20demo.ipynb)
+in this repository.
 
 ### User modeling
 
@@ -203,6 +108,29 @@ I guess I'm going!
 >>> Bob.express_interest(meetup)
 ```
 
+**Important caveat**: Every concept is associated with the name of a Wikipedia article, so it's important to make sure
+that any concepts
+you attempt to plug into your model directly correspond exactly with the titles of their corresponding articles. For
+example, Wikipedia has a page for `Bayes' theorem` - but not for `Bayes' Theorem` or for `Bayes' law`. Thus calling
+`stochastic_topics.add("Bayes' law")` would work but would cause problems down the line. Instead if you are inputting
+ a concept label that is reasonably close to the correct one you can explicitly run it through Watson to sanitize
+ the input and make it safe for use:
+
+```
+>>> from node import conceptualize
+>>> conceptualize("Bayes' theorem")
+'Bayes' theorem'
+>>> conceptualize("Bayes' law")
+'Bayes' theorem'
+>>> conceptualize("Bayes")
+'Thomas Bayes'
+>>> conceptualize("Met")
+'Metropolitan Opera'
+>>> conceptualize("Smithsonian Museum")
+'Smithsonian Institution'
+```
+
+It is especially crucial that you run this on anything you are given which is user-defined!
 
 ## Documentation
 
