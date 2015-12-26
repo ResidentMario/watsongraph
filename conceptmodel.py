@@ -2,10 +2,11 @@ from node import Node
 import networkx as nx
 import event_insight_lib
 from networkx.readwrite import json_graph
-import graphistry
-import os
-import json
+# import graphistry
+# import os
+# import json
 
+# TODO: Graphistry-based visualize() method.
 
 class ConceptModel:
     """
@@ -270,41 +271,43 @@ class ConceptModel:
             self.get_node(node['id']).relevance = node['relevance']
             self.get_node(node['id']).view_count = node['view_count']
 
-    def visualize(self, filename='graphistry_credentials.json'):
-        """
-        Generates a ConceptModel visualization. WIP. Need to get a graphistry key first...
-        :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
-        `graphistry_credentials.json`.
-        :return: The generated visualization.
-        """
-        graphistry_token = import_graphistry_credentials(filename=filename)
-        graphistry.register(key=graphistry_token)
-        flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
-        flattened_model_dataframe = nx.convert_matrix.to_pandas_dataframe(flattened_model)
-        g = graphistry.bind(source='source', destination='target')
-        g.plot(flattened_model_dataframe)
+    # def visualize(self, filename='graphistry_credentials.json'):
+    #     """
+    #     Generates a ConceptModel visualization. WIP. Need to get a graphistry key first...
+    #     :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
+    #     `graphistry_credentials.json`.
+    #     :return: The generated visualization.
+    #     """
+    #     graphistry_token = import_graphistry_credentials(filename=filename)
+    #     graphistry.register(key=graphistry_token)
+    #     flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
+    #     flattened_model_dataframe = nx.convert_matrix.to_pandas_dataframe(flattened_model)
+    #     for key in flattened_model_dataframe.keys():
+    #         flattened_model_dataframe[key] = flattened_model_dataframe[key].astype(str)
+    #     g = graphistry.bind(source='source', destination='target')
+    #     g.plot(flattened_model_dataframe)
 
 
-def import_graphistry_credentials(filename='graphistry_credentials.json'):
-    """
-    Internal method which finds the credentials file describing the token that's needed to access Graphistry
-    services. Graphistry is an alpha-level in-development backend that is used here for visualizing the
-    ConceptModel, so keys are given out on a per-user basis; see https://github.com/graphistry/pygraphistry for more
-    information.
-
-    See also `event_insight_lib.import_credentials()`, which replicates this operation for the (required) Concept
-    Insights API service key.
-
-    :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
-    `graphistry_credentials.json`.
-    """
-    if filename in [f for f in os.listdir('.') if os.path.isfile(f)]:
-        return json.load(open(filename))['credentials']['key']
-    else:
-        raise IOError(
-                'The visualization methods that come with the watson-graph library require a Graphistry credentials '
-                'token to work. Did you forget to define one? For more information refer '
-                'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
+# def import_graphistry_credentials(filename='graphistry_credentials.json'):
+#     """
+#     Internal method which finds the credentials file describing the token that's needed to access Graphistry
+#     services. Graphistry is an alpha-level in-development backend that is used here for visualizing the
+#     ConceptModel, so keys are given out on a per-user basis; see https://github.com/graphistry/pygraphistry for more
+#     information.
+#
+#     See also `event_insight_lib.import_credentials()`, which replicates this operation for the (required) Concept
+#     Insights API service key.
+#
+#     :param filename -- The filename at which Graphistry service credentials are stored. Defaults to
+#     `graphistry_credentials.json`.
+#     """
+#     if filename in [f for f in os.listdir('.') if os.path.isfile(f)]:
+#         return json.load(open(filename))['credentials']['key']
+#     else:
+#         raise IOError(
+#                 'The visualization methods that come with the watson-graph library require a Graphistry credentials '
+#                 'token to work. Did you forget to define one? For more information refer '
+#                 'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
 
 
 def model(user_input):
