@@ -1,5 +1,5 @@
-# watson-graph
-`watson-graph` is a Pythonic concept graphing and recommendation library.
+# watsongraph
+`watsongraph` is a Pythonic concept graphing and recommendation library.
 The library's core `ConceptModel` objects is constructed out of the individual concept nodes which are associated with
 labels from the IBM Watson `wikipedia/en-20120601` cognitive graph, queried using the
 [Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html) and
@@ -14,18 +14,20 @@ This `ConceptMap` can then be associated with any number of applications. Basic 
 
 An example of a web application using this code is provided in the [cultural-insight](https://github.com/ResidentMario/cultural-insight) repository.
 
-## Using the code
+## Setup
 
-Note that in order to use the IBM Watson cognitive APIs you *must* register an account on Bluemix first.
+`watsongraph` is [available on PyPi](https://pypi.python.org/pypi/watsongraph/): to get it simply call `pip install
+ watsongraph`.
 
-Once you have forked and pulled the code onto your local development machine, you will need to create a
-`concept_insight_credentials.json` file containing your [IBM Bluemix](https://console.ng.bluemix.net/) access
-credentials. If you do not have an account already you may [register](https://console.ng.bluemix.net/registration/)
-for a free trial account. Once you are logged in, enter the catalog, scroll down to the "IBM Watson" section, and
-click through to create an instance of the "Concept Insights" service. Go back to the dashboard, click on the newly
-populated service, and click through to "Service Credentials" on the sidebar to get your service credentials:
-copy-paste this file and save it locally as the aforementioned `concept_insight_credentials.json`. Your credentials
-should look something like this:
+In order to use the IBM Watson cognitive APIs you **must** register an account on Bluemix first.
+
+Once you have the code locally, you will need to create a `concept_insight_credentials.json` file containing your
+[IBM Bluemix](https://console.ng.bluemix.net/) access credentials. If you do not have an account already you may
+[register](https://console.ng.bluemix.net/registration/) for a free trial account. Once you are logged in, enter the
+catalog, scroll down to the "IBM Watson" section, and click through to create an instance of the "Concept Insights"
+service. Go back to the dashboard, click on the newly populated service, and click through to "Service Credentials"
+on the sidebar to get your service credentials: copy-paste this file and save it locally as the aforementioned
+`concept_insight_credentials.json`. Your credentials should look something like this:
 
 ```
 {
@@ -37,11 +39,8 @@ should look something like this:
 }
 ```
 
-If you are a developer you may also be interested in reading the [Congitive Insight API documentation](https://watson-api-explorer.mybluemix.net/swagger.html?url=/listings/concept-insights-v2.json#!/graphs/graphLabelSearch).
 Note that outside of the thirty-day trial, high-throughput queries to IBM Bluemix can quickly prove costly, but for
 experimental purposes the free allotment is more than enough.
-
-Aside from that you will need the `networkx`, `requests`, and `mwviews` packages, all of with are easy to `pip`.
 
 ## Examples
 
@@ -54,7 +53,7 @@ based on topical connections between articles generated not by "dumb" links betw
 learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
 development today.
 
-For a peek at what you can do check out the [demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20ConceptModel%20demo.ipynb)
+For a peek at what you can do check out the [demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20ConceptModel%20demo.ipynb)
 in this repository.
 
 ### User modeling
@@ -63,11 +62,11 @@ This library provides basic but durable and highly extendible facilities for con
 Insights -based user recommendation service. The two classes of interest provided here are `User` and `Item`.
 `ConceptModel` objects are implicit in both of these classes but have been elegantly abstracted away from.
 
-For a peek at what you can do check out the [other demo notebook](https://github.com/ResidentMario/watson-graph/blob/master/watson-graph%20-%20User%20Modeling%20Demo.ipynb)
+For a peek at what you can do check out the [other demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20User%20Modeling%20Demo.ipynb)
 in this repository.
 
 Refer to the [Cultural Insight](https://github.com/ResidentMario/cultural-insight) repository for a complete web
 application using this library in this manner.
 
-You can also try out the IBM [trial application](https://concept-insights-demo.mybluemix.net/) which, though it
-doesn't use this code, in no small part inspired it!
+For further inspiration you can also try out IBM's own
+[example application](https://concept-insights-demo.mybluemix.net/) (which predates this library).

@@ -305,7 +305,7 @@ class ConceptModel:
 #         return json.load(open(filename))['credentials']['key']
 #     else:
 #         raise IOError(
-#                 'The visualization methods that come with the watson-graph library require a Graphistry credentials '
+#                 'The visualization methods that come with the watsongraph library require a Graphistry credentials '
 #                 'token to work. Did you forget to define one? For more information refer '
 #                 'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
 
