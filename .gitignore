@@ -31,8 +31,7 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Project notebooks
-*.ipynb
+# Project notebook support
 /.ipynb_checkpoints
 
 # Project-specific
