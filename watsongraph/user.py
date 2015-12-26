@@ -172,7 +172,7 @@ class User:
 
     def load_user(self, filename='accounts.json'):
         """
-        Saves a user to a JSON file.
+        Load a user from a JSON file.
         :param filename: The filename for the account storage file; `accounts.json` is the default.
         """
         if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:
@@ -189,12 +189,10 @@ class User:
                         user_index = i
                         break
                 user_data = data['accounts'][user_index]
-                user = User(user_id=self.id,
-                            model=self.model.load_from_json(user_data['model']),
-                            exceptions=user_data['exceptions'],
-                            password=user_data['password']
-                            )
-                return user
+                self.id = user_data.id
+                self.model.load_from_json(user_data['model'])
+                self.exceptions = user_data['exceptions']
+                self.password = user_data['password']
 
     def update_user_credentials(self, filename='accounts.json'):
         """
