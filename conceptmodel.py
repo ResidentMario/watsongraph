@@ -30,7 +30,7 @@ class ConceptModel:
             for concept_label in list_of_concepts:
                 mixin_concept = Node(concept_label)
                 self.graph.add_node(mixin_concept)
-        # Set the maturity of the resultant model.
+                # Set the maturity of the resultant model.
 
     ###################################
     # Setters, getters, and printers. #
@@ -41,11 +41,11 @@ class ConceptModel:
         Edge pretty-printing method that's useful for debugging.
         """
         sorted_edge_tuples = sorted([(self.graph.edge[edge[0]][edge[1]]['weight'], edge[0], edge[1]) for edge in
-                                    self.graph.edges()], reverse=True)
+                                     self.graph.edges()], reverse=True)
         for index, edge_repr in enumerate(sorted_edge_tuples):
             print(str(index), edge_repr[1].concept + ' <- ' + str(edge_repr[0]) + ' -> ' + edge_repr[2].concept)
 
-    def print_nodes(self):
+    def print_concepts(self):
         """
         Node pretty-printing method that's useful for debugging.
         """
@@ -64,13 +64,19 @@ class ConceptModel:
         """
         return sorted([concept.concept for concept in self.nodes()])
 
+    def concepts_by_view_count(self):
+        """
+        :return: Returns a list of concepts sorted by view_count.
+        """
+        return sorted([(node.view_count, node.concept) for node in self.nodes()], reverse=True)
+
     def edges(self):
         """
         :return: Returns a list of all of the (concept, other concept, strength) tuples in the ConceptModel. See
         also `print_edges()` and `self.graph.edges()`.
         """
-        return [(edge[0].concept, edge[1].concept, self.graph[edge[0]][edge[1]]['weight']) for edge in
-                self.graph.edges()]
+        return sorted([(self.graph[edge[0]][edge[1]]['weight'], edge[0].concept, edge[1].concept) for edge in
+                       self.graph.edges()], reverse=True)
 
     def set_view_counts(self):
         """
@@ -91,6 +97,13 @@ class ConceptModel:
                 return node
         raise RuntimeError('Concept ' + concept + ' not found in ' + str(self))
 
+    def remove(self, concept):
+        """
+        Removes the given concept from the ConceptModel.
+        :param concept: The concept being removed from the model.
+        """
+        self.graph.remove_node(self.get_node(concept))
+
     def get_view_count(self, concept):
         """
         Returns the `view_count` of a concept in the `ConceptModel`.
@@ -98,6 +111,16 @@ class ConceptModel:
         :return: The `view_count` int parameter of the concept, if it is found. Throws an error if it is not.
         """
         return self.get_node(concept).view_count
+
+    def neighborhood(self, concept):
+        """
+        Returns the "neighborhood" of a concept: a (concept, correlation) list of concepts pointing to/from it,
+        plus itself.
+        :param concept: The concept to focus in on.
+        :return: The neighborhood, represented by a list of edge much like the one returned by `edges()`.
+        """
+        return [(node.concept, self.graph[self.get_node(concept)][node]['weight']) for node in self.graph.neighbors(
+                self.get_node(concept))] + [(concept, 1)]
 
     ##################
     # Graph methods. #
@@ -197,7 +220,7 @@ class ConceptModel:
         for concept_node in self.nodes():
             self.augment_by_node(concept_node, level=level, limit=limit)
 
-    def expand(self, level=0, limit=20):
+    def expand(self, level=0, limit=20, n=1):
         """
         Expands a graph by augmenting concepts with only one (or no) edge. Warning: for sufficiently large graphs this
         is a slow operation! See also the expand() method for a less focused version of this operation.
@@ -206,8 +229,9 @@ class ConceptModel:
         parameter is a parameter that is passed directly to the IBM Watson API call.
         :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
         directly to the IBM Watson API call.
+        :param n -- The cutoff for the number of neighbors a node can have.
         """
-        for concept_node in [node for node in self.nodes() if len(self.graph.neighbors(node)) <= 1]:
+        for concept_node in [node for node in self.nodes() if len(self.graph.neighbors(node)) <= n]:
             self.augment_by_node(concept_node, level=level, limit=limit)
 
     def intersection_with(self, mixin_concept_model):
@@ -253,10 +277,12 @@ class ConceptModel:
         `graphistry_credentials.json`.
         :return: The generated visualization.
         """
-        graphistry_token = import_graphistry_credentials()
+        graphistry_token = import_graphistry_credentials(filename=filename)
         graphistry.register(key=graphistry_token)
         flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
-        graphistry.bind(source='src', destination='dst', node='nodeid').plot(flattened_model)
+        flattened_model_dataframe = nx.convert_matrix.to_pandas_dataframe(flattened_model)
+        g = graphistry.bind(source='source', destination='target')
+        g.plot(flattened_model_dataframe)
 
 
 def import_graphistry_credentials(filename='graphistry_credentials.json'):
@@ -276,9 +302,9 @@ def import_graphistry_credentials(filename='graphistry_credentials.json'):
         return json.load(open(filename))['credentials']['key']
     else:
         raise IOError(
-            'The visualization methods that come with the watson-graph library require a Graphistry credentials '
-            'token to work. Did you forget to define one? For more information refer '
-            'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
+                'The visualization methods that come with the watson-graph library require a Graphistry credentials '
+                'token to work. Did you forget to define one? For more information refer '
+                'to:\n\nhttps://github.com/graphistry/pygraphistry#api-key')
 
 
 def model(user_input):
