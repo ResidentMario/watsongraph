@@ -24,8 +24,7 @@ def import_credentials(filename='concept_insight_credentials.json'):
     else:
         raise IOError(
             'This API requires a Bluemix/Watson credentials token to work. Did you forget to define '
-            'one? For more information refer to:\n\nhttps://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud'
-            '/doc/getting_started/gs-credentials.shtml')
+            'one? For more information refer to:\n\nhttps://github.com/ResidentMario/watsongraph#setup')
 
 
 def generate_token(filename='concept_insight_credentials.json', tokenfile='token.json'):
