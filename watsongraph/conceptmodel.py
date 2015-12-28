@@ -121,8 +121,8 @@ class ConceptModel:
         :param concept: The concept to focus in on.
         :return: The neighborhood, represented by a list of edge much like the one returned by `edges()`.
         """
-        return [(concept, 1)] + [(node.concept, self.graph[self.get_node(concept)][node]['weight']) for node in
-                                 self.graph.neighbors(self.get_node(concept))]
+        return sorted([(concept, 1)] + [(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
+                                 self.graph.neighbors(self.get_node(concept))], reverse=True)
 
     ##################
     # Graph methods. #

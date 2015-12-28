@@ -43,7 +43,6 @@ graphistry_credentials.json
 token.json
 accounts.json
 events.json
-items.json
 model.json
 
 # Test files
@@ -52,6 +51,3 @@ model_test.py
 io_test.py
 test.py
 lesmiserables.csv
-
-# Extension
-event.py
