@@ -109,6 +109,11 @@ class User:
         Resolves arbitrary user input to concepts, explodes the resultant nodes, and adds the resultant graph to the
         user's present one.
         :param interest: Arbitrary user input.
+        :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+        most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
+        parameter is a parameter that is passed directly to the IBM Watson API call.
+        :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
+        directly to the IBM Watson API call.
         """
         mapped_concept = conceptualize(interest)
         if mapped_concept:
@@ -125,6 +130,11 @@ class User:
         Resolves a series of arbitrary user inputs to concepts, explodes the resultant nodes, and adds the resultant
         graph to the user's present one.
         :param interests: Arbitrary user input.
+        :param level -- The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+        most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
+        parameter is a parameter that is passed directly to the IBM Watson API call.
+        :param limit -- a cutoff placed on the number of related concepts to be returned. This parameter is passed
+        directly to the IBM Watson API call.
         """
         for interest in interests:
             self.input_interest(interest, level=level, limit=limit)

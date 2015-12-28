@@ -8,6 +8,7 @@ from networkx.readwrite import json_graph
 
 # TODO: Graphistry-based visualize() method.
 
+
 class ConceptModel:
     """
     The ConceptModel object wraps a `nx.Graph` object. Nodes (vertices) are `Node` objects and edges are the
@@ -120,8 +121,8 @@ class ConceptModel:
         :param concept: The concept to focus in on.
         :return: The neighborhood, represented by a list of edge much like the one returned by `edges()`.
         """
-        return [(node.concept, self.graph[self.get_node(concept)][node]['weight']) for node in self.graph.neighbors(
-                self.get_node(concept))] + [(concept, 1)]
+        return [(concept, 1)] + [(node.concept, self.graph[self.get_node(concept)][node]['weight']) for node in
+                                 self.graph.neighbors(self.get_node(concept))]
 
     ##################
     # Graph methods. #
@@ -155,7 +156,8 @@ class ConceptModel:
         directly to the IBM Watson API call.
         """
         mixin = ConceptModel()
-        related_concepts_raw = watsongraph.event_insight_lib.get_related_concepts(node.concept, level=level, limit=limit)
+        related_concepts_raw = watsongraph.event_insight_lib.get_related_concepts(node.concept, level=level,
+                                                                                  limit=limit)
         if node not in self.nodes():
             self.graph.add_node(node)
         for raw_concept in related_concepts_raw['concepts']:

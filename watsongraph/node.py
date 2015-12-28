@@ -11,21 +11,11 @@ class Node:
     """
 
     """
-    The proper name of the IBM Watson API graph node, e.g. `"/graphs/wikipedia/en-20120601/concepts/IBM_Watson"`.
-    """
-    node = ""
-
-    """
     The name of the Wikipedia article associated with the node, e.g. Apple, Apple Inc., Nirvana (band), etc.
     "Label" is the terminology used by the IBM Watson API for this attribute; "Concept" is the terminology used
     instead by this library (we are building a `ConceptModel()` not a `LabelModel()`!).
     """
     concept = ""
-
-    """
-    The node's parsed display name. Apple is Apple, but so is Apple (band) and Apple (album).
-    """
-    name = ""
 
     """
     A raw monthly view count of the Wikipedia article associated with the concept. For speed this parameter is left
@@ -42,17 +32,11 @@ class Node:
         """
         :param concept: The raw concept used to initialize the node.
         """
-        self.node = "/graphs/wikipedia/en-20120601/concepts/" + concept.replace(' ', '_')
         self.concept = concept
-        if "(" in self.concept:
-            self.name = concept[:concept.find("(")]
-        else:
-            self.name = concept
         if view_count:
             self.view_count = view_count
         if relevance:
             self.relevance = relevance
-        # The view_count attribute is left unset by default.
 
     def __eq__(self, other):
         """
