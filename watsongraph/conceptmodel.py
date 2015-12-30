@@ -3,10 +3,27 @@ import networkx as nx
 import watsongraph.event_insight_lib
 from networkx.readwrite import json_graph
 # import graphistry
-# import os
-# import json
 
+
+# TODO: Advanced concept modeling notebook.
+# 1. Remove the basic modeling examples from the existing notebook---let it lie as an introduction to methodology.
+#    In particular that Microsoft related companies methodology, I am now realizing, is pretty bunk.
+# 2. Start a new notebook based around Model Construction (provisional title?). Topics to cover:
+#    - Parameters
+#    --- View count. Port all of the "kinda random" code directly out of the existing notebook.
+#    --- Relevancy. Talk about how this property is applied for user modeling.
+#    --- Arbitrary parameterization, and how both of the above are examples thereof. Introduce `set_property()` and
+#        `give_property()`.
+#    - Model Construction
+#    --- Introduce `add_edge()` and `add_edges()`.
+#    --- Recommended methodology for constructing models. Introduce Wikidata. No specific bindings are provided by
+#        default but you get the best mileage out of it using `wdq`: http://wdq.wmflabs.org/api_documentation.html.
+#    --- Construct the Microsoft graph the old way, show how long it takes!
+#    --- Construct the Microsoft graph using `add_edge()` and `wdq`.
+#    - Serialization.
+#    --- Serializing ConceptModel objects with JSON. Cut out that last bit of the existing notebook and elaborate.
 # TODO: Graphistry-based visualize() method.
+# Come back to this task in a while, they're working through Unicode errors at the moment, nothing to be done just yet.
 
 
 class ConceptModel:
@@ -68,7 +85,7 @@ class ConceptModel:
 
     def concepts_by_view_count(self):
         """
-        :return: Returns a list of concepts sorted by view_count.
+        :return: Returns a list of (view_count, concept) tuples sorted by view_count.
         """
         return sorted([(node.view_count, node.concept) for node in self.nodes()], reverse=True)
 
@@ -116,13 +133,13 @@ class ConceptModel:
 
     def neighborhood(self, concept):
         """
-        Returns the "neighborhood" of a concept: a (concept, correlation) list of concepts pointing to/from it,
-        plus itself.
+        Returns the "neighborhood" of a concept: a list of (correlation, concept) tuples pointing to/from it,
+        plus itself (a concept has a self-correlation of 1!).
         :param concept: The concept to focus in on.
         :return: The neighborhood, represented by a list of edge much like the one returned by `edges()`.
         """
         return sorted([(1, concept)] + [(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
-                                 self.graph.neighbors(self.get_node(concept))], reverse=True)
+                                        self.graph.neighbors(self.get_node(concept))], reverse=True)
 
     ##################
     # Graph methods. #
@@ -237,16 +254,54 @@ class ConceptModel:
         for concept_node in [node for node in self.nodes() if len(self.graph.neighbors(node)) <= n]:
             self.augment_by_node(concept_node, level=level, limit=limit)
 
-    def intersection_with(self, mixin_concept_model):
+    def intersection_with_by_nodes(self, mixin_concept_model):
         """
-        :param mixin_concept_model: Another ConceptModel to be compared to.
-        :return: A list of overlapping concept nodes. with their relevance parameters set to average relevance.
+        :param mixin_concept_model: Another ConceptModel object to be compared to.
+        :return: A list of overlapping concept nodes with their relevance parameters set to average relevance.
         """
         overlapping_concept_nodes = [node for node in self.nodes() if node in mixin_concept_model.nodes()]
         for concept_node in overlapping_concept_nodes:
             concept_node.set_relevance((concept_node.relevance + mixin_concept_model.get_node(
                     concept_node.concept).relevance) / 2)
         return overlapping_concept_nodes
+
+    def add_edges(self, source_concept, list_of_target_concepts, prune=False):
+        """
+        Given a source concept and a list of target concepts, creates relevance edges between the source and the
+        targets and adds them to the graph.
+        :param source_concept: The source concept edges are being added from.
+        :param list_of_target_concepts: The target concepts edges are being added to.
+        :param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
+        a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
+        and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
+        When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
+        0.5 are added.
+        """
+        raw_scores = watsongraph.event_insight_lib.get_relation_scores(source_concept, list_of_target_concepts)
+        mixin_graph = nx.Graph()
+        mixin_source_node = Node(source_concept)
+        for raw_concept in raw_scores['scores']:
+            if not prune or (prune and raw_concept['score'] > 0.5):
+                mixin_target_node = Node(raw_concept['concept'][raw_concept['concept'].rfind('/') + 1:])
+                mixin_graph.add_edge(mixin_source_node, mixin_target_node, weight=raw_concept['score'])
+        self.graph = nx.compose(self.graph, mixin_graph)
+
+    def add_edge(self, source_concept, target_concept, prune=False):
+        """
+        Wrapper for `add_edges` for the single-concept case, so that you don't have to call a list explicitly.
+        :param source_concept: The source concept edges are being added from.
+        :param target_concept: The target concept an edge is being added to.
+        :param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
+        a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
+        and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
+        When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
+        0.5 are added.
+        """
+        self.add_edges(source_concept, [target_concept], prune=prune)
+
+    ###############
+    # IO methods. #
+    ###############
 
     def to_json(self):
         """

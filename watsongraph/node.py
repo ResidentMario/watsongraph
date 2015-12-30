@@ -6,8 +6,7 @@ import watsongraph.event_insight_lib
 class Node:
     """
     The IBM Watson Concept Insights API is based on a weighted graph of Wikipedia pages. Each vertex in the graph
-    corresponds to an individual article, referred to as a "node". This "Node" object class abstracts these nodes
-    and adds some light Wikipedia-derived syntactic sugar.
+    corresponds to an individual article, referred to as a "node". This "Node" object class abstracts these nodes.
     """
 
     """
@@ -27,6 +26,15 @@ class Node:
     A measure of the strength of the concept. Left unset explicitly unless manipulated by certain `User` class methods.
     """
     relevance = 0.0
+
+    # TODO: Refactor view_count and relevance as two examples of user-definable arbitrary properties.
+    # 1. Create a `props` parameter, an initially empty dict of property:value tuples.
+    # 2. In `conceptmodel` create a `set_property(concept, property, value)` method for writing to it.
+    # 3. In `conceptmodel` create a `give_property(map)` method for writing to it via a function.
+    # 4. Rewrite the `conceptmodel` methods which set relevance directly to do so via `set_relevance()`.
+    # 5. Re-frame `view_count` and `relevance` as two use-cases of `props` which are supported by default.
+    #    e.g. rewrite `set_view_count()` and `set_relevance()`.
+    # 6. Rewrite `conceptmodel` `to_json()` and `from_json()` methods to pass `props` materials around.
 
     def __init__(self, concept, view_count=view_count, relevance=relevance):
         """
@@ -53,13 +61,6 @@ class Node:
         way to support `nx.compose()` as used in `conceptmodel.merge_with()`.
         """
         return int(hashlib.md5(self.concept.encode()).hexdigest(), 16)
-
-    def hacky_str_rpr(self):
-        """
-        :return: A concatenated string representation used for ConceptModel data storage. See `conceptmodel.to_json()`,
-        `conceptmodel.load_from_json()`.
-        """
-        return self.concept + '_' + str(self.relevance) + '_' + str(self.view_count)
 
     def set_view_count(self):
         """
