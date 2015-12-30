@@ -23,6 +23,13 @@ class Node:
     view_count = 0
 
     """
+    A dictionary of arbitrary parameter:value tuples. `view_count` and `relevance` are two such parameters which
+    have baked-in support, but the point of this abstraction is that the user ought to be able to extend the data saved
+    in the ConceptModel object however they want to.
+    """
+    properties = dict()
+
+    """
     A measure of the strength of the concept. Left unset explicitly unless manipulated by certain `User` class methods.
     """
     relevance = 0.0
@@ -36,19 +43,17 @@ class Node:
     #    e.g. rewrite `set_view_count()` and `set_relevance()`.
     # 6. Rewrite `conceptmodel` `to_json()` and `from_json()` methods to pass `props` materials around.
 
-    def __init__(self, concept, view_count=view_count, relevance=relevance):
+    def __init__(self, concept, **kwargs):
         """
         :param concept: The raw concept used to initialize the node.
+        :param kwargs: A list of property:value tuples to be passed to the `properties` parameter.
         """
         self.concept = concept
-        if view_count:
-            self.view_count = view_count
-        if relevance:
-            self.relevance = relevance
+        self.properties.update(kwargs)
 
     def __eq__(self, other):
         """
-        Two nodes are equal when their concept attributes are equivalent.
+        Two `Node` objects are equal when their `concept` attributes are the same string.
         """
         if self and other:
             return self.concept == other.concept
@@ -69,13 +74,29 @@ class Node:
         p = PageviewsClient().article_views("en.wikipedia", [self.concept.replace(' ', '_')])
         p = [p[key][self.concept.replace(' ', '_')] for key in p.keys()]
         p = int(sum([daily_view_count for daily_view_count in p if daily_view_count])/len(p))
-        self.view_count = p
+        # self.view_count = p
+        self.properties['view_count'] = p
+        print(self.properties['view_count'])
 
     def set_relevance(self, relevance):
         """
         :param relevance: Sets the concept's relevance parameter.
         """
-        self.relevance = relevance
+        # self.relevance = relevance
+        self.set_property('relevance', relevance)
+
+    def set_property(self, prop, value):
+        """
+        :param prop: The property to be stored.
+        :param value: The value being stored.
+        """
+        self.properties.update({prop: value})
+
+    def get_property(self, prop):
+        """
+        :param prop: The property to be retrieved.
+        """
+        return self.properties[prop]
 
 
 def conceptualize(user_input):

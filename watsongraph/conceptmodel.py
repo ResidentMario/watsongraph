@@ -2,6 +2,7 @@ from watsongraph.node import Node
 import networkx as nx
 import watsongraph.event_insight_lib
 from networkx.readwrite import json_graph
+from mwviews.api import PageviewsClient
 # import graphistry
 
 
@@ -83,12 +84,6 @@ class ConceptModel:
         """
         return sorted([concept.concept for concept in self.nodes()])
 
-    def concepts_by_view_count(self):
-        """
-        :return: Returns a list of (view_count, concept) tuples sorted by view_count.
-        """
-        return sorted([(node.view_count, node.concept) for node in self.nodes()], reverse=True)
-
     def edges(self):
         """
         :return: Returns a list of all of the (concept, other concept, strength) tuples in the ConceptModel. See
@@ -96,14 +91,6 @@ class ConceptModel:
         """
         return sorted([(self.graph[edge[0]][edge[1]]['weight'], edge[0].concept, edge[1].concept) for edge in
                        self.graph.edges()], reverse=True)
-
-    def set_view_counts(self):
-        """
-        Initializes the view counts for all of the Concept objects in the ConceptModel. See Concept for a
-        description of why this parameter is optional.
-        """
-        for node in self.nodes():
-            node.set_view_count()
 
     def get_node(self, concept):
         """
@@ -123,14 +110,6 @@ class ConceptModel:
         """
         self.graph.remove_node(self.get_node(concept))
 
-    def get_view_count(self, concept):
-        """
-        Returns the `view_count` of a concept in the `ConceptModel`.
-        :param concept: The concept supposedly in the `ConceptModel`.
-        :return: The `view_count` int parameter of the concept, if it is found. Throws an error if it is not.
-        """
-        return self.get_node(concept).view_count
-
     def neighborhood(self, concept):
         """
         Returns the "neighborhood" of a concept: a list of (correlation, concept) tuples pointing to/from it,
@@ -140,6 +119,47 @@ class ConceptModel:
         """
         return sorted([(1, concept)] + [(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
                                         self.graph.neighbors(self.get_node(concept))], reverse=True)
+
+    ######################
+    # Parameter methods. #
+    ######################
+
+    def concepts_by_view_count(self):
+        """
+        :return: Returns a list of (view_count, concept) tuples sorted by view_count.
+        """
+        # return sorted([(node.view_count, node.concept) for node in self.nodes()], reverse=True)
+        return sorted([(node.get_property('view_count'), node.concept) for node in self.nodes()], reverse=True)
+
+    def set_view_counts(self):
+        """
+        Initializes the view counts for all of the Concept objects in the ConceptModel. See Concept for a
+        description of why this parameter is optional.
+        """
+        for node in self.nodes():
+            p = PageviewsClient().article_views("en.wikipedia", [node.concept.replace(' ', '_')])
+            p = [p[key][node.concept.replace(' ', '_')] for key in p.keys()]
+            p = int(sum([daily_view_count for daily_view_count in p if daily_view_count])/len(p))
+            deep_copy = node.properties.copy()
+            deep_copy.update({'view_count': p})
+            node.properties = deep_copy
+
+    def get_view_count(self, concept):
+        """
+        Returns the `view_count` of a concept in the `ConceptModel`.
+        :param concept: The concept supposedly in the `ConceptModel`.
+        :return: The `view_count` int parameter of the concept, if it is found. Throws an error if it is not.
+        """
+        return self.get_node(concept).get_property('view_count')
+
+    def set_property(self, concept, param, value):
+        """
+        Sets the `param` property of `concept` to `value`.
+        :param concept: Concept being given a parameter.
+        :param param: The parameter being given.
+        :param value: The value the parameter being given takes on.
+        """
+        self.get_node(concept).set_property(param, value)
 
     ##################
     # Graph methods. #
