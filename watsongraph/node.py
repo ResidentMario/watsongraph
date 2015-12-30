@@ -54,13 +54,6 @@ class Node:
         """
         return int(hashlib.md5(self.concept.encode()).hexdigest(), 16)
 
-    def hacky_str_rpr(self):
-        """
-        :return: A concatenated string representation used for ConceptModel data storage. See `conceptmodel.to_json()`,
-        `conceptmodel.load_from_json()`.
-        """
-        return self.concept + '_' + str(self.relevance) + '_' + str(self.view_count)
-
     def set_view_count(self):
         """
         Sets the view_count parameter appropriately, using a 30-day average.

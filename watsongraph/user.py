@@ -53,7 +53,7 @@ class User:
         :return: Returns a float that rates this user's hypothesized interest in the given event, based on the
         intersection between their own ConceptModel and that of the examined Event.
         """
-        intersection = self.model.intersection_with(item.model)
+        intersection = self.model.intersection_with_by_nodes(item.model)
         if len(intersection) == 0:
             return 0
         else:
