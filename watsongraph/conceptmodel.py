@@ -5,7 +5,25 @@ from networkx.readwrite import json_graph
 # import graphistry
 
 
+# TODO: Advanced concept modeling notebook.
+# 1. Remove the basic modeling examples from the existing notebook---let it lie as an introduction to methodology.
+#    In particular that Microsoft related companies methodology, I am now realizing, is pretty bunk.
+# 2. Start a new notebook based around Model Construction (provisional title?). Topics to cover:
+#    - Parameters
+#    --- View count. Port all of the "kinda random" code directly out of the existing notebook.
+#    --- Relevancy. Talk about how this property is applied for user modeling.
+#    --- Arbitrary parameterization, and how both of the above are examples thereof. Introduce `set_property()` and
+#        `give_property()`.
+#    - Model Construction
+#    --- Introduce `add_edge()` and `add_edges()`.
+#    --- Recommended methodology for constructing models. Introduce Wikidata. No specific bindings are provided by
+#        default but you get the best mileage out of it using `wdq`: http://wdq.wmflabs.org/api_documentation.html.
+#    --- Construct the Microsoft graph the old way, show how long it takes!
+#    --- Construct the Microsoft graph using `add_edge()` and `wdq`.
+#    - Serialization.
+#    --- Serializing ConceptModel objects with JSON. Cut out that last bit of the existing notebook and elaborate.
 # TODO: Graphistry-based visualize() method.
+# Come back to this task in a while, they're working through Unicode errors at the moment, nothing to be done just yet.
 
 
 class ConceptModel:
