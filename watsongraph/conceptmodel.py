@@ -140,9 +140,7 @@ class ConceptModel:
             p = PageviewsClient().article_views("en.wikipedia", [node.concept.replace(' ', '_')])
             p = [p[key][node.concept.replace(' ', '_')] for key in p.keys()]
             p = int(sum([daily_view_count for daily_view_count in p if daily_view_count])/len(p))
-            deep_copy = node.properties.copy()
-            deep_copy.update({'view_count': p})
-            node.properties = deep_copy
+            node.set_property('view_count', p)
 
     def get_view_count(self, concept):
         """
@@ -160,6 +158,15 @@ class ConceptModel:
         :param value: The value the parameter being given takes on.
         """
         self.get_node(concept).set_property(param, value)
+
+    def map_property(self, prop, func):
+        """
+        Maps the `param` property of all of the concepts in the ConceptModel object by way of the user-provided `func`.
+        :param prop: The parameter being given.
+        :param func: The function that is called on the concept in order to determine the value of `prop`.
+        """
+        for node in self.nodes():
+            node.set_property(prop, func(node.concept))
 
     ##################
     # Graph methods. #
@@ -332,8 +339,10 @@ class ConceptModel:
         flattened_model = nx.relabel_nodes(self.graph, {node: node.concept for node in self.nodes()})
         data_repr = json_graph.node_link_data(flattened_model)
         for node in data_repr['nodes']:
-            node['relevance'] = self.get_node(node['id']).relevance
-            node['view_count'] = self.get_node(node['id']).view_count
+            for prop in self.get_node(node['id']).properties.keys():
+                node[prop] = self.get_node(node['id']).properties[prop]
+            # node['relevance'] = self.get_node(node['id']).relevance
+            # node['view_count'] = self.get_node(node['id']).view_count
         return data_repr
 
     def load_from_json(self, data_repr):
@@ -345,8 +354,8 @@ class ConceptModel:
         flattened_model = json_graph.node_link_graph(data_repr)
         self.graph = ConceptModel([node for node in flattened_model.nodes()]).graph
         for node in data_repr['nodes']:
-            self.get_node(node['id']).relevance = node['relevance']
-            self.get_node(node['id']).view_count = node['view_count']
+            for key in [key for key in node.keys() if key != 'id']:
+                self.set_property(node['id'], key, node[key])
 
     # def visualize(self, filename='graphistry_credentials.json'):
     #     """

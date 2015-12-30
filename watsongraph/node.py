@@ -17,22 +17,11 @@ class Node:
     concept = ""
 
     """
-    A raw monthly view count of the Wikipedia article associated with the concept. For speed this parameter is left
-    unset unless explicitly set by the `set_view_count()` method.
-    """
-    view_count = 0
-
-    """
     A dictionary of arbitrary parameter:value tuples. `view_count` and `relevance` are two such parameters which
     have baked-in support, but the point of this abstraction is that the user ought to be able to extend the data saved
     in the ConceptModel object however they want to.
     """
-    properties = dict()
-
-    """
-    A measure of the strength of the concept. Left unset explicitly unless manipulated by certain `User` class methods.
-    """
-    relevance = 0.0
+    properties = None
 
     # TODO: Refactor view_count and relevance as two examples of user-definable arbitrary properties.
     # 1. Create a `props` parameter, an initially empty dict of property:value tuples.
@@ -49,7 +38,9 @@ class Node:
         :param kwargs: A list of property:value tuples to be passed to the `properties` parameter.
         """
         self.concept = concept
-        self.properties.update(kwargs)
+        self.properties = kwargs
+        if not self.properties:
+            self.properties = dict()
 
     def __eq__(self, other):
         """

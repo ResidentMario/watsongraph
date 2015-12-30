@@ -45,7 +45,7 @@ class User:
         """
         :return: Returns (interest, concept) pair tuples associated with the user.
         """
-        return sorted([(node.relevance, node.concept) for node in self.model.nodes()], reverse=True)
+        return sorted([(node.get_relevance(), node.concept) for node in self.model.nodes()], reverse=True)
 
     def interest_in(self, item):
         """
@@ -57,7 +57,7 @@ class User:
         if len(intersection) == 0:
             return 0
         else:
-            return sum([concept_node.relevance for concept_node in intersection])
+            return sum([concept_node.get_relevance() for concept_node in intersection])
 
     def get_best_item(self, item_list):
         """
@@ -81,12 +81,13 @@ class User:
         self.model.merge_with(item.model)
         # Raise correlated relevancies.
         for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
-            self.model.get_node(concept).relevance = min(1.0, self.model.get_node(concept).relevance * 1.2)
+            self.model.get_node(concept).properties['relevance'] = min(1.0, self.model.get_node(
+                    concept).get_relevance() * 1.2)
         # Bump down uncorrelated relevancies.
         for concept in [concept for concept in item.concepts() if concept not in self.concepts()]:
-            concept.relevance *= 0.9
+            concept.properties['relevance'] *= 0.9
         # Remove irrelevant concepts (to keep the model relatively clean).
-        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).relevance <= 0.2]:
+        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).get_relevance() <= 0.2]:
             self.model.remove(concept)
         self.exceptions.append(item.name)
 
@@ -99,9 +100,9 @@ class User:
         self.exceptions.append(item.name)
         # Scale down overlapping concepts.
         for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
-            self.model.get_node(concept).relevance *= 0.75
+            self.model.get_node(concept).properties['relevance'] *= 0.75
         # Remove irrelevant concepts (to keep the model relatively clean).
-        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).relevance <= 0.2]:
+        for concept in [concept for concept in self.concepts() if self.model.get_node(concept).get_relevance() <= 0.2]:
             self.model.remove(concept)
 
     def input_interest(self, interest, level=0, limit=20):
@@ -118,11 +119,11 @@ class User:
         mapped_concept = conceptualize(interest)
         if mapped_concept:
             mapped_model = ConceptModel([mapped_concept])
-            mapped_model.get_node(mapped_concept).relevance = 1.0
+            mapped_model.get_node(mapped_concept).properties['relevance'] = 1.0
             mapped_model.explode(level=level, limit=limit)
             # Set relevancies based on edge weights.
             for node in list(mapped_model.graph[mapped_model.get_node(mapped_concept)].keys()):
-                node.relevance = mapped_model.graph[mapped_model.get_node(mapped_concept)][node]['weight']
+                node.properties['relevance'] = mapped_model.graph[mapped_model.get_node(mapped_concept)][node]['weight']
             self.model.merge_with(mapped_model)
 
     def input_interests(self, interests, level=0, limit=20):
