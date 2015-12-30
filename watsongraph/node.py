@@ -76,6 +76,12 @@ class Node:
         # self.relevance = relevance
         self.set_property('relevance', relevance)
 
+    def get_relevance(self):
+        """
+        :return: The concept's relevance parameter.
+        """
+        return self.get_property('relevance')
+
     def set_property(self, prop, value):
         """
         :param prop: The property to be stored.

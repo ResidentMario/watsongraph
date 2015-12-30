@@ -3,6 +3,8 @@ import networkx as nx
 import watsongraph.event_insight_lib
 from networkx.readwrite import json_graph
 from mwviews.api import PageviewsClient
+
+
 # import graphistry
 
 
@@ -46,6 +48,7 @@ class ConceptModel:
         # Initialize the model graph object.
         self.graph = nx.Graph()
         # Enter and associate the starting nodes.
+        # TODO: Assert that a list is passed, otherwise it will decompile the string into letters. Common error!
         if list_of_concepts:
             for concept_label in list_of_concepts:
                 mixin_concept = Node(concept_label)
@@ -124,12 +127,19 @@ class ConceptModel:
     # Parameter methods. #
     ######################
 
+    def concepts_by_property(self, prop):
+        """
+        :param prop: The property to sort the returned output by.
+        :return: Returns a list of `(prop, concept)` tuples sorted by prop.
+        """
+        return sorted([(node.get_property(prop), node.concept) for node in self.nodes()], reverse=True)
+
     def concepts_by_view_count(self):
         """
-        :return: Returns a list of (view_count, concept) tuples sorted by view_count.
+        Wrapper for `concepts_by_property(prop)` for the `view_count` case.
+        :return: Returns a list of `(view_count, concept)` tuples sorted by `view_count`.
         """
-        # return sorted([(node.view_count, node.concept) for node in self.nodes()], reverse=True)
-        return sorted([(node.get_property('view_count'), node.concept) for node in self.nodes()], reverse=True)
+        return self.concepts_by_property('view_count')
 
     def set_view_counts(self):
         """
@@ -139,7 +149,7 @@ class ConceptModel:
         for node in self.nodes():
             p = PageviewsClient().article_views("en.wikipedia", [node.concept.replace(' ', '_')])
             p = [p[key][node.concept.replace(' ', '_')] for key in p.keys()]
-            p = int(sum([daily_view_count for daily_view_count in p if daily_view_count])/len(p))
+            p = int(sum([daily_view_count for daily_view_count in p if daily_view_count]) / len(p))
             node.set_property('view_count', p)
 
     def get_view_count(self, concept):
@@ -288,8 +298,9 @@ class ConceptModel:
         """
         overlapping_concept_nodes = [node for node in self.nodes() if node in mixin_concept_model.nodes()]
         for concept_node in overlapping_concept_nodes:
-            concept_node.set_relevance((concept_node.relevance + mixin_concept_model.get_node(
-                    concept_node.concept).relevance) / 2)
+            if 'relevance' in concept_node.properties.keys():
+                concept_node.set_relevance((concept_node.properties['relevance'] + mixin_concept_model.get_node(
+                        concept_node.concept).properties['relevance']) / 2)
         return overlapping_concept_nodes
 
     def add_edges(self, source_concept, list_of_target_concepts, prune=False):
@@ -308,14 +319,17 @@ class ConceptModel:
         mixin_graph = nx.Graph()
         mixin_source_node = Node(source_concept)
         for raw_concept in raw_scores['scores']:
+            raw_concept['concept'] = raw_concept['concept'].replace('_', ' ')
             if not prune or (prune and raw_concept['score'] > 0.5):
-                mixin_target_node = Node(raw_concept['concept'][raw_concept['concept'].rfind('/') + 1:])
-                mixin_graph.add_edge(mixin_source_node, mixin_target_node, weight=raw_concept['score'])
+                mixin_concept = raw_concept['concept'][raw_concept['concept'].rfind('/') + 1:]
+                if mixin_concept != source_concept:
+                    mixin_target_node = Node(mixin_concept)
+                    mixin_graph.add_edge(mixin_source_node, mixin_target_node, weight=raw_concept['score'])
         self.graph = nx.compose(self.graph, mixin_graph)
 
     def add_edge(self, source_concept, target_concept, prune=False):
         """
-        Wrapper for `add_edges` for the single-concept case, so that you don't have to call a list explicitly.
+        Wrapper for `add_edges()` for the single-concept case, so that you don't have to call a list explicitly.
         :param source_concept: The source concept edges are being added from.
         :param target_concept: The target concept an edge is being added to.
         :param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
@@ -325,6 +339,21 @@ class ConceptModel:
         0.5 are added.
         """
         self.add_edges(source_concept, [target_concept], prune=prune)
+
+    def explode_edges(self, prune=False):
+        """
+        Calls `add_edges()` on everything in the model, all at once. Like `explode()` but for concept edges!
+        :param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
+        a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
+        and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
+        When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
+        0.5 are added.
+        """
+        c_list = self.concepts()
+        for concept in self.concepts():
+            c_list.remove(concept)
+            if c_list:
+                self.add_edges(concept, c_list, prune=prune)
 
     ###############
     # IO methods. #
@@ -341,18 +370,17 @@ class ConceptModel:
         for node in data_repr['nodes']:
             for prop in self.get_node(node['id']).properties.keys():
                 node[prop] = self.get_node(node['id']).properties[prop]
-            # node['relevance'] = self.get_node(node['id']).relevance
-            # node['view_count'] = self.get_node(node['id']).view_count
         return data_repr
 
     def load_from_json(self, data_repr):
         """
-        Generates a ConceptModel out of a JSON representation. Counter-operation to `convert_concept_to_dict()`.
+        Generates a ConceptModel out of a JSON representation. Counter-operation to `to_dict()`.
         :param data_repr: The dictionary being passed to the method.
         :return: The generated ConceptModel.
         """
-        flattened_model = json_graph.node_link_graph(data_repr)
-        self.graph = ConceptModel([node for node in flattened_model.nodes()]).graph
+        flattened_graph = json_graph.node_link_graph(data_repr)
+        m = {concept: Node(concept) for concept in flattened_graph.nodes()}
+        self.graph = nx.relabel_nodes(flattened_graph, m)
         for node in data_repr['nodes']:
             for key in [key for key in node.keys() if key != 'id']:
                 self.set_property(node['id'], key, node[key])

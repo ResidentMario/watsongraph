@@ -36,6 +36,9 @@ class Item:
             self.model = model_input(description)
         else:
             self.model = ConceptModel()
+        # Item relevancies are instantiated to 0.0 in order to support operations on it in the `User` class.
+        for concept in self.model.concepts():
+            self.model.set_property(concept, 'relevance', 0.0)
 
     def nodes(self):
         """
@@ -53,7 +56,7 @@ class Item:
         """
         :return: Sorted (relevance, concept) pairs associated with the Item.
         """
-        return sorted([(node.relevance, node.concept) for node in self.nodes()], reverse=True)
+        return sorted([(node.properties['relevance'], node.concept) for node in self.nodes()], reverse=True)
 
     def to_json(self):
         """
