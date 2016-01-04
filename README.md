@@ -42,6 +42,8 @@ on the sidebar to get your service credentials: copy-paste this file and save it
 Note that outside of the thirty-day trial, high-throughput queries to IBM Bluemix can quickly prove costly, but for
 experimental purposes the free allotment is more than enough.
 
+This library is Python 3 only for the moment.
+
 ## Examples
 
 ### Concept mapping
