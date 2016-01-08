@@ -3,7 +3,7 @@ setup(
   name = 'watsongraph',
   packages = ['watsongraph'], # this must be the same as the name above
   install_requires=['networkx', 'requests', 'mwviews'],
-  version = '0.2.0',
+  version = '0.2.1',
   description = 'Concept discovery and recommendation library built on top of the IBM Watson cognitive API.',
   author = 'Aleksey Bilogur',
   author_email = 'aleksey.bilogur@gmail.com',
