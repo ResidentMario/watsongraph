@@ -14,6 +14,8 @@ This `ConceptMap` can then be associated with any number of applications. Basic 
 
 An example of a web application using this code is provided in the [cultural-insight](https://github.com/ResidentMario/cultural-insight) repository.
 
+The code is `Python 3`-only for the moment.
+
 ## Setup
 
 `watsongraph` is [available on PyPi](https://pypi.python.org/pypi/watsongraph/): to get it simply call `pip install
