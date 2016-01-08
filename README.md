@@ -19,15 +19,14 @@ An example of a web application using this code is provided in the [cultural-ins
 `watsongraph` is [available on PyPi](https://pypi.python.org/pypi/watsongraph/): to get it simply call `pip install
  watsongraph`.
 
-In order to use the IBM Watson cognitive APIs you **must** register an account on Bluemix first.
-
-Once you have the code locally, you will need to create a `concept_insight_credentials.json` file containing your
-[IBM Bluemix](https://console.ng.bluemix.net/) access credentials. If you do not have an account already you may
-[register](https://console.ng.bluemix.net/registration/) for a free trial account. Once you are logged in, enter the
-catalog, scroll down to the "IBM Watson" section, and click through to create an instance of the "Concept Insights"
-service. Go back to the dashboard, click on the newly populated service, and click through to "Service Credentials"
-on the sidebar to get your service credentials: copy-paste this file and save it locally as the aforementioned
-`concept_insight_credentials.json`. Your credentials should look something like this:
+However, in order to use the IBM Watson cognitive APIs you **must** register for it on Bluemix first. In particular,
+once you have the code locally, you will need to create a `concept_insight_credentials.json` file
+containing your [IBM Bluemix](https://console.ng.bluemix.net/) access credentials. If you do not have an account
+already you may [register](https://console.ng.bluemix.net/registration/) for a free trial account. Once you are
+logged in, enter the catalog, scroll down to the "IBM Watson" section, and click through to create an instance of the
+"Concept Insights" service. Go back to the dashboard, click on the newly populated service, and click through to
+"Service Credentials" on the sidebar to get your service credentials: copy-paste this file and save it locally as
+the aforementioned `concept_insight_credentials.json`. Your credentials should look something like this:
 
 ```
 {
@@ -39,8 +38,8 @@ on the sidebar to get your service credentials: copy-paste this file and save it
 }
 ```
 
-Note that outside of the thirty-day trial, high-throughput queries to IBM Bluemix can quickly prove costly, but for
-experimental purposes the free allotment is more than enough.
+Note that outside of the thirty-day trial IBM Watson is a paid service, but for experimental purposes the monthly free
+allotment (25,000 queries) is more than enough.
 
 ## Examples
 
@@ -53,9 +52,8 @@ based on topical connections between articles generated not by "dumb" links betw
 learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
 development today.
 
-For a peek at what you can do check out the [demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
-in this repository.
-
+For a peek at what you can do check out the [ConceptModel demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
+in this repository. For even more on this topic see the [Advanced Concept Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb).
 ### User modeling
 
 This library provides basic but durable and highly extendible facilities for constructing an IBM Watson Cognitive
