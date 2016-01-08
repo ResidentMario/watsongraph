@@ -199,6 +199,16 @@ class ConceptModel:
         """
         self.graph = nx.compose(self.graph, mixin_concept_model.graph)
 
+    def copy(self):
+        """
+        Returns a deep copy of itself. Used by `User.express_interest()` to merge `Item` and `User` concept models
+        without distorting the `Item` model.
+        :return: A deep copy of the current `ConceptModel`.
+        """
+        ret = ConceptModel()
+        ret.graph = self.graph.copy()
+        return ret
+
     def augment_by_node(self, node, level=0, limit=50):
         """
         Augments the ConceptModel by mining the given node and adding newly discovered nodes to the resultant graph.

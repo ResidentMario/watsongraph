@@ -36,9 +36,6 @@ class Item:
             self.model = model_input(description)
         else:
             self.model = ConceptModel()
-        # Item relevancies are instantiated to 0.0 in order to support operations on it in the `User` class.
-        for concept in self.model.concepts():
-            self.model.set_property(concept, 'relevance', 0.0)
 
     def nodes(self):
         """

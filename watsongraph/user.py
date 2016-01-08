@@ -1,5 +1,6 @@
 import os
 import json
+import statistics
 from watsongraph.conceptmodel import ConceptModel
 from watsongraph.node import conceptualize
 
@@ -78,15 +79,18 @@ class User:
         exceptions.
         :param item: Event object the user is expressing interest in.
         """
-        self.model.merge_with(item.model)
         # Raise correlated relevancies.
+        item_copy = item.model.copy()
+        # self.model.merge_with(item.model)
         for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
-            self.model.get_node(concept).properties['relevance'] = min(1.0, self.model.get_node(
-                    concept).get_relevance() * 1.2)
+            new_relevance = min(1.0, statistics.mean([self.model.get_node(concept).get_relevance(),
+                                                      item.model.get_node(concept).get_relevance()]) * 1.2)
+            item_copy.get_node(concept).properties['relevance'] = new_relevance
         # Bump down uncorrelated relevancies.
-        for concept in [concept for concept in item.concepts() if concept not in self.concepts()]:
-            concept.properties['relevance'] *= 0.9
+        for concept in [concept for concept in self.concepts() if concept not in item_copy.concepts()]:
+            self.model.get_node(concept).properties['relevance'] *= 0.9
         # Remove irrelevant concepts (to keep the model relatively clean).
+        self.model.merge_with(item_copy)
         for concept in [concept for concept in self.concepts() if self.model.get_node(concept).get_relevance() <= 0.2]:
             self.model.remove(concept)
         self.exceptions.append(item.name)
