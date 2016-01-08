@@ -63,14 +63,16 @@ class User:
     def get_best_item(self, item_list):
         """
         Retrieves the event within a list of events which is most relevant to the given user's interests.
-        :param item_list: The list of Event objects to be examined.
-        :return: The Event which best matches the user's interests.
+        :param item_list: The list of Item objects to be examined.
+        :return: The Item which best matches the user's interests.
         """
         best_item = None
         highest_relevance = 0.0
         for item in item_list:
-            if self.interest_in(item) >= highest_relevance and item.name not in self.exceptions:
+            interest = self.interest_in(item)
+            if interest >= highest_relevance and item.name not in self.exceptions:
                 best_item = item
+                highest_relevance = interest
         return best_item
 
     def express_interest(self, item):
