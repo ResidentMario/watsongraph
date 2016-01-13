@@ -5,16 +5,12 @@ labels from the IBM Watson `wikipedia/en-20120601` cognitive graph, queried usin
 [Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html) and
 reconstructed locally as a [networkx](https://networkx.github.io/)-based weighted conceptual graph.
 
-Nodes are defined by `Concept` objects, each mapped to a unique Wikipedia page, which are in turn
-connected to one another by edges demarcating relevance (on a 0-to-1 probabilistic scale) within a
-`ConceptMap` object.
+Each node in the `ConceptModel` is mapped to a corresponding unique Wikipedia page, and nodes are in turn connected
+to another by "relevance edges" (in range the range 0 to 1, a probabilistic scale). This `ConceptModel` can then be
+associated with any number of applications. Basic bindings are provided, in particular, for a recommendation service
+using library-provided `Item` and `User` classes.
 
-This `ConceptMap` can then be associated with any number of applications. Basic bindings are provided, in particular,
- for a recommendation service based on `Item` and `User` classes.
-
-An example of a web application using this code is provided in the [cultural-insight](https://github.com/ResidentMario/cultural-insight) repository.
-
-The code is `Python 3`-only for the moment.
+This code is `Python 3`-only for the moment.
 
 ## Setup
 
@@ -43,8 +39,6 @@ the aforementioned `concept_insight_credentials.json`. Your credentials should l
 Note that outside of the thirty-day trial IBM Watson is a paid service, but for experimental purposes the monthly free
 allotment (25,000 queries) is more than enough.
 
-This library is Python 3 only for the moment.
-
 ## Examples
 
 ### Concept mapping
@@ -56,19 +50,45 @@ based on topical connections between articles generated not by "dumb" links betw
 learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
 development today.
 
-For a peek at what you can do check out the [ConceptModel demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
-in this repository. For even more on this topic see the [Advanced Concept Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb).
+For example:
+
+```
+>>> from watsongraph.conceptmodel import ConceptModel
+>>> ibm = ConceptModel(['IBM'])
+>>> ibm.explode()
+>>> ibm.concepts()
+['.NET Framework', 'ARM architecture', 'Advanced Micro Devices', ...]
+>>> len(ibm.concepts())
+37
+>>> 'Server (computing)' in ibm.concepts()
+True
+>>> ibm.augment('Server (computing)')
+>>> len(ibm.concepts())
+58
+>>> ibm.edges()
+[(0.89564085, 'IBM', 'Digital Equipment Corporation'),
+ (0.8793883, 'Solaris (operating system)', 'Server (computing)'),
+ ...
+]
+
+```
+
+The [ConceptModel demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
+provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here.
+
+
+The [Advanced Concept Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
+provides a detailed walkthrough of advanced `ConceptModel` features as well as recommendations about how to use them
+for modelling. To learn more about how best to apply this library, go here (but read the above first!).
+
 ### User modeling
 
 This library provides basic but durable and highly extendible facilities for constructing an IBM Watson Cognitive
 Insights -based user recommendation service. The two classes of interest provided here are `User` and `Item`.
-`ConceptModel` objects are implicit in both of these classes but have been elegantly abstracted away from.
+`ConceptModel` objects are implicit in both of these classes but have been abstracted away from.
 
-For a peek at what you can do check out the [other demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations%20Demo.ipynb)
+To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations%20Demo.ipynb)
 in this repository.
-
-Refer to the [Cultural Insight](https://github.com/ResidentMario/cultural-insight) repository for a complete web
-application using this library in this manner.
 
 For further inspiration you can also try out IBM's own
 [example application](https://concept-insights-demo.mybluemix.net/) (which predates this library).
