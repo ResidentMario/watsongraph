@@ -112,6 +112,9 @@ def annotate_text(text, content_type='text/plain', token_file='token.json'):
     headers = {'X-Watson-Authorization-Token': token, 'Content-Type': content_type, 'Accept': 'application/json'}
     dat = text.encode(encoding='UTF-8', errors='ignore')
     r = requests.post(base_url, headers=headers, data=dat)
+    # Catch a recurring error of unknown server-side provenance. Further details:
+    # https://github.com/ResidentMario/watsongraph/issues/6
+    r.raise_for_status()
     return json.loads(r.text)
 
 
@@ -141,6 +144,7 @@ def get_related_concepts(label, level=0, limit=10, token_file='token.json'):
     base_url += '/related_concepts?concepts=["/graphs/wikipedia/en-20120601/concepts/' + label
     base_url += '"]&level=' + str(level) + '&limit=' + str(limit)
     r = requests.get(base_url, headers=headers)
+    r.raise_for_status()
     return json.loads(r.text)
 
 
@@ -169,4 +173,5 @@ def get_relation_scores(label, list_of_target_labels, token_file='token.json'):
         base_url += '"/graphs/wikipedia/en-20120601/concepts/' + t_label + '",'
     base_url = base_url[:-1] + ']'
     r = requests.get(base_url, headers=headers)
+    r.raise_for_status()
     return json.loads(r.text)

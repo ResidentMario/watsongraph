@@ -1,5 +1,6 @@
 import os
 import json
+import statistics
 from watsongraph.conceptmodel import ConceptModel
 from watsongraph.node import conceptualize
 
@@ -62,14 +63,16 @@ class User:
     def get_best_item(self, item_list):
         """
         Retrieves the event within a list of events which is most relevant to the given user's interests.
-        :param item_list: The list of Event objects to be examined.
-        :return: The Event which best matches the user's interests.
+        :param item_list: The list of Item objects to be examined.
+        :return: The Item which best matches the user's interests.
         """
         best_item = None
         highest_relevance = 0.0
         for item in item_list:
-            if self.interest_in(item) >= highest_relevance and item.name not in self.exceptions:
+            interest = self.interest_in(item)
+            if interest >= highest_relevance and item.name not in self.exceptions:
                 best_item = item
+                highest_relevance = interest
         return best_item
 
     def express_interest(self, item):
@@ -78,15 +81,18 @@ class User:
         exceptions.
         :param item: Event object the user is expressing interest in.
         """
-        self.model.merge_with(item.model)
         # Raise correlated relevancies.
+        item_copy = item.model.copy()
+        # self.model.merge_with(item.model)
         for concept in [concept for concept in item.concepts() if concept in self.concepts()]:
-            self.model.get_node(concept).properties['relevance'] = min(1.0, self.model.get_node(
-                    concept).get_relevance() * 1.2)
+            new_relevance = min(1.0, statistics.mean([self.model.get_node(concept).get_relevance(),
+                                                      item.model.get_node(concept).get_relevance()]) * 1.2)
+            item_copy.get_node(concept).properties['relevance'] = new_relevance
         # Bump down uncorrelated relevancies.
-        for concept in [concept for concept in item.concepts() if concept not in self.concepts()]:
-            concept.properties['relevance'] *= 0.9
+        for concept in [concept for concept in self.concepts() if concept not in item_copy.concepts()]:
+            self.model.get_node(concept).properties['relevance'] *= 0.9
         # Remove irrelevant concepts (to keep the model relatively clean).
+        self.model.merge_with(item_copy)
         for concept in [concept for concept in self.concepts() if self.model.get_node(concept).get_relevance() <= 0.2]:
             self.model.remove(concept)
         self.exceptions.append(item.name)
