@@ -87,7 +87,24 @@ This library provides basic but durable and highly extendible facilities for con
 Insights -based user recommendation service. The two classes of interest provided here are `User` and `Item`.
 `ConceptModel` objects are implicit in both of these classes but have been abstracted away from.
 
-To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations%20Demo.ipynb)
+For example:
+
+```
+>>> from watsongraph.user import User
+>>> from watsongraph.item import Item
+>>> Bob = User(user_id="Bob")
+>>> Bob.input_interests(["Data science", "Machine learning", "Big data", "Cognitive science"])
+>>> meetup = Item("Meetup", "This is a description of a pretty awesome event...")
+>>> relay = Item("Relay", "This is a description of another pretty awesome event...")
+>>> Bob.interest_in(meetup)
+1.633861635
+>>> Bob.interest_in(relay)
+1.54593405
+# Update the "Bob" model to account for our new information on Bob's preferences.
+>>> Bob.express_interest(meetup)
+```
+
+To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations.ipynb)
 in this repository.
 
 For further inspiration you can also try out IBM's own
