@@ -6,7 +6,11 @@ import watsongraph.event_insight_lib
 class Node:
     """
     The IBM Watson Concept Insights API is based on a weighted graph of Wikipedia pages. Each vertex in the graph
-    corresponds to an individual article, referred to as a "node". This "Node" object class abstracts these nodes.
+    corresponds to an individual article, referred to as a "node" or "label". This `Node` object class abstracts these
+    nodes. They are the basis of the `ConceptModel` object.
+
+    Nodes are internal representations which are never exposed to the end user. Developers work with Nodes only
+    through the overall `ConceptModel`.
     """
 
     """
@@ -23,18 +27,13 @@ class Node:
     """
     properties = None
 
-    # TODO: Refactor view_count and relevance as two examples of user-definable arbitrary properties.
-    # 1. Create a `props` parameter, an initially empty dict of property:value tuples.
-    # 2. In `conceptmodel` create a `set_property(concept, property, value)` method for writing to it.
-    # 3. In `conceptmodel` create a `give_property(map)` method for writing to it via a function.
-    # 4. Rewrite the `conceptmodel` methods which set relevance directly to do so via `set_relevance()`.
-    # 5. Re-frame `view_count` and `relevance` as two use-cases of `props` which are supported by default.
-    #    e.g. rewrite `set_view_count()` and `set_relevance()`.
-    # 6. Rewrite `conceptmodel` `to_json()` and `from_json()` methods to pass `props` materials around.
-
     def __init__(self, concept, **kwargs):
         """
-        :param concept: The raw concept used to initialize the node.
+        :param concept: The concept that is being wrapped by the Node. In Concept Insight terminology this concept
+        is known as the "label", since it is expected to correspond one-to-one with the exact name of a Wikipedia
+        article in Watson's `en-20120601` graph. For example, Apple Inc. is a valid concept/label while Apple (
+        company) is not.
+
         :param kwargs: A list of property:value tuples to be passed to the `properties` parameter.
         """
         self.concept = concept
@@ -101,6 +100,7 @@ def conceptualize(user_input):
     Attempts to map arbitrary textual input to a valid Concept. If the method is unsuccessful no Concept is
     returned. See also the similar `conceptmodel.model` static method, which binds arbitrary input to an entire
     ConceptModel instead.
+
     :param user_input: Arbitrary input, be it a name (e.g. Apple (company) -> Apple Inc.) or a text string (e.g.
     "the iPhone 5C, released this Thursday..." -> iPhone).
     """
