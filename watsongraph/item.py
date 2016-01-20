@@ -15,9 +15,6 @@ from watsongraph.conceptmodel import model as model_input
 class Item:
     """
     The Item object is a generic container for the objects that the application is trying to recommend to its users.
-    In the example application this class is extended by Event; it could also be extended by a class like Recipe,
-    Talk, etc. In case you want to use Item as a standalone class (for experimentation or whatever else),
-    JSON saving and loading binds are also provided for this class.
     """
     description = ""
     name = ""
@@ -26,9 +23,12 @@ class Item:
     def __init__(self, name="", description=""):
         """
         Loads an `Item` object from its description and an associated name.
+
         :param name: The Item's name.
+
         :param description: A textual description of what the Item is about or describes. This is mined at
-        initialization for the concepts which are associated with this Item's ConceptModel().
+         initialization for the concepts which are associated with this Item's ConceptModel().
+
         """
         self.name = name
         self.description = description
@@ -58,6 +58,7 @@ class Item:
     def to_json(self):
         """
         Returns a JSON of the Item object suitable for storage. Counter-operation to `load_from_json()`.
+
         :return: A JSON serialization of the Item object which is suitable for storage.
         """
         return {
@@ -69,6 +70,7 @@ class Item:
     def load_from_json(self, data):
         """
         Loads an Item from its JSON serialization. Counter-operation to `to_json()`.
+
         :param data: The JSON data being loaded into an Item object.
         """
         self.model.load_from_json(data['model'])
@@ -77,6 +79,7 @@ class Item:
     def save(self, filename='items.json'):
         """
         Saves the Item to a JSON representation.
+
         :param filename: The filename for the items storage file; `items.json` is the default.
         """
         item_schema = self.to_json()
@@ -108,6 +111,7 @@ class Item:
     def load(self, filename="items.json"):
         """
         Loads the Item from a JSON representation.
+
         :param filename: The filename for the items storage file; `items.json` is the default.
         """
         if filename not in [f for f in os.listdir('.') if os.path.isfile(f)]:

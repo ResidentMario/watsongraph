@@ -46,14 +46,24 @@
 <span class="target" id="module-conceptmodel"></span><dl class="class">
 <dt id="conceptmodel.ConceptModel">
 <em class="property">class </em><code class="descclassname">conceptmodel.</code><code class="descname">ConceptModel</code><span class="sig-paren">(</span><em>list_of_concepts=None</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>The ConceptModel object wraps a <cite>nx.Graph</cite> object. Nodes (vertices) are <cite>Node</cite> objects and edges are the
-correlation scores (just &#8220;scores&#8221; in IBM Watson API terminology).</p>
+<dd><p>The <cite>ConceptModel</cite> object is at the core of what this library does.</p>
+<p>Each <strong>concept</strong> in the <cite>ConceptModel</cite> is mapped to a corresponding unique Wikipedia page. These concepts are
+connected to one another in turn by <strong>relevance edges</strong> of a 0-to-1 scaled strength. This <cite>ConceptModel</cite> can then
+be associated with any number of applications. Basic bindings are provided, in particular, for a recommendation
+service using library-provided <cite>Item</cite> and <cite>User</cite> classes.</p>
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>list_of_concepts=None</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes the ConceptModel using a list of raw concepts.
-:param list_of_concepts: A list of concept labels (eg. [&#8216;Microsoft&#8217;, &#8216;IBM&#8217;] or [&#8216;Apple Inc.&#8217;]) to initialize
-the model around.</p>
+<dd><p>Initializes a <cite>ConceptModel</cite> around a list of concepts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_of_concepts</strong> &#8211; A list of concept labels (eg. [&#8216;Microsoft&#8217;, &#8216;IBM&#8217;] or [&#8216;Apple Inc.&#8217;]) to initialize the
+model around.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -61,47 +71,84 @@ the model around.</p>
 <code class="descname">abridge</code><span class="sig-paren">(</span><em>concept</em>, <em>level=0</em>, <em>limit=50</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.abridge" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs the inverse operation of augment by removing the expansion of the given concept from the graph.
 This method is an externally-facing wrapper for the internal <cite>abridge_by_node()</cite> method: the difference is
-that this method maps a concept while that method maps a node.
-:param concept &#8211; The concept to be expanded. Note that this concept need not already be present in the graph.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
-most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.</p>
+that this method maps a concept while that method maps a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>concept</strong> &#8211; The concept to be expanded. Note that this concept need not already be present in the graph.</li>
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the most
+popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
+parameter is a parameter that is passed directly to the IBM Watson API call.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.add">
 <code class="descname">add</code><span class="sig-paren">(</span><em>concept</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple adder method.
-:param concept: Concept to be added to the model.</p>
+<dd><p>Simple adder method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>concept</strong> &#8211; Concept to be added to the model.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.add_edge">
 <code class="descname">add_edge</code><span class="sig-paren">(</span><em>source_concept</em>, <em>target_concept</em>, <em>prune=False</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.add_edge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for <cite>add_edges()</cite> for the single-concept case, so that you don&#8217;t have to call a list explicitly.
-:param source_concept: The source concept edges are being added from.
-:param target_concept: The target concept an edge is being added to.
-:param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
-a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
-and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
-When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
-0.5 are added.</p>
+<dd><p>Wrapper for <cite>add_edges()</cite> for the single-concept case, so that you don&#8217;t have to call a list explicitly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_concept</strong> &#8211; The source concept edges are being added from.</li>
+<li><strong>target_concept</strong> &#8211; The target concept an edge is being added to.</li>
+<li><strong>prune</strong> &#8211; Watson returns correlations for edges which it does not know enough about as 0.5,
+a lack of extensibility which can cause sizable issues: for example you might have both <cite>(0.5, IBM,
+Apple Inc.)</cite> and <cite>(0.5, IBM, Apple)</cite>. We as humans know that these are totally not equal comparisons,
+but the system does not! When this parameter is set to <cite>True</cite> (it is set to <cite>False</cite> by default) only edges
+with a correlation higher than 0.5 are added.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.add_edges">
 <code class="descname">add_edges</code><span class="sig-paren">(</span><em>source_concept</em>, <em>list_of_target_concepts</em>, <em>prune=False</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.add_edges" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a source concept and a list of target concepts, creates relevance edges between the source and the
-targets and adds them to the graph.
-:param source_concept: The source concept edges are being added from.
-:param list_of_target_concepts: The target concepts edges are being added to.
-:param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
-a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
-and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
-When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
-0.5 are added.</p>
+targets and adds them to the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_concept</strong> &#8211; The source concept edges are being added from.</li>
+<li><strong>list_of_target_concepts</strong> &#8211; The target concepts edges are being added to.</li>
+<li><strong>prune</strong> &#8211; Watson returns correlations for edges which it does not know enough about as 0.5,
+a lack of extensibility which can cause sizable issues: for example you might have both <cite>(0.5, IBM,
+Apple Inc.)</cite> and <cite>(0.5, IBM, Apple)</cite>. We as humans know that these are totally not equal comparisons,
+but the system does not! When this parameter is set to True (it is set to False by default) only edges
+with a correlation higher than 0.5 are added.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -109,13 +156,22 @@ When this parameter is set to True (it is set to False by default) only edges wi
 <code class="descname">augment</code><span class="sig-paren">(</span><em>concept</em>, <em>level=0</em>, <em>limit=50</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.augment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Augments the ConceptModel by assigning the given node to a concept and adding newly discovered nodes to the
 resultant graph. This method is an externally-facing wrapper for the internal <cite>augment_by_node()</cite> method:
-the difference is that this method maps a concept while that method maps a node.
-:param concept &#8211; The concept to be expanded. Note that this concept need not already be present in the graph.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
-most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.</p>
+the difference is that this method maps a concept while that method maps a node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>concept</strong> &#8211; The concept to be expanded. Note that this concept need not already be present in the graph.</li>
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is the highest, corresponding with
+the most popular articles; a limit of 5 is the broadest.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -125,7 +181,7 @@ directly to the IBM Watson API call.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a sorted list of all concepts in the ConceptModel.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a sorted list of all concepts in the <cite>ConceptModel</cite>.</td>
 </tr>
 </tbody>
 </table>
@@ -140,27 +196,40 @@ directly to the IBM Watson API call.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prop</strong> &#8211; The <cite>property</cite> to sort the returned output by.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a list of <cite>(prop, concept)</cite> tuples sorted by prop. Note that this method will fail if this
+property is not initialized for all concepts.</td>
 </tr>
 </tbody>
 </table>
-<p>Returns a list of <cite>(prop, concept)</cite> tuples sorted by prop. Note that this method will fail if this property
-is not initialized for all concepts.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.concepts_by_view_count">
 <code class="descname">concepts_by_view_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.concepts_by_view_count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for <cite>concepts_by_property()</cite> for the <cite>view_count</cite> case.
-:return: Returns a list of <cite>(view_count, concept)</cite> tuples sorted by <cite>view_count</cite>.</p>
+<dd><p>Wrapper for <cite>concepts_by_property()</cite> for the <cite>view_count</cite> case.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a list of <cite>(view_count, concept)</cite> tuples sorted by <cite>view_count</cite>.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.copy">
 <code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a deep copy of itself. Used by <cite>User.express_interest()</cite> to merge <cite>Item</cite> and <cite>User</cite> concept models
-without distorting the <cite>Item</cite> model.
-:return: A deep copy of the current <cite>ConceptModel</cite>.</p>
+without distorting the <cite>Item</cite> model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A deep copy of the current <cite>ConceptModel</cite>.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -170,7 +239,7 @@ without distorting the <cite>Item</cite> model.
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a list of all (concept, other concept, strength) tuples in the ConceptModel.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns a list of all <cite>(concept, other concept, strength)</cite> tuples in the <cite>ConceptModel</cite>.</td>
 </tr>
 </tbody>
 </table>
@@ -180,70 +249,130 @@ without distorting the <cite>Item</cite> model.
 <dt id="conceptmodel.ConceptModel.expand">
 <code class="descname">expand</code><span class="sig-paren">(</span><em>level=0</em>, <em>limit=50</em>, <em>n=1</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.expand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expands a graph by augmenting concepts with only one (or no) edge. Warning: for sufficiently large graphs this
-is a slow operation! See also the expand() method for a less focused version of this operation.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+is a slow operation! See also the expand() method for a less focused version of this operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
 most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.
-:param n &#8211; The cutoff for the number of neighbors a node can have.</p>
+parameter is a parameter that is passed directly to the IBM Watson API call.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+<li><strong>n</strong> &#8211; The cutoff for the number of neighbors a node can have.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.explode">
 <code class="descname">explode</code><span class="sig-paren">(</span><em>level=0</em>, <em>limit=50</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.explode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Explodes a graph by augmenting every concept already in it. Warning: for sufficiently large graphs this is a
-very slow operation! See also the expand() method for a more focused version of this operation.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+very slow operation! See also the expand() method for a more focused version of this operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
 most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.</p>
+parameter is a parameter that is passed directly to the IBM Watson API call.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.explode_edges">
 <code class="descname">explode_edges</code><span class="sig-paren">(</span><em>prune=False</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.explode_edges" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calls <cite>add_edges()</cite> on everything in the model, all at once. Like <cite>explode()</cite> but for concept edges!
-:param prune: Watson returns correlations for edges which it does not know enough about as 0.5,
-a lack of extensibility which can cause sizable issues: for example you might have both (0.5, IBM, Apple Inc.)
-and (0.5, IBM, Apple). We as humans know that these are totally not equal comparisons, but the system does not!
-When this parameter is set to True (it is set to False by default) only edges with a correlation higher than
-0.5 are added.</p>
+<dd><p>Calls <cite>add_edges()</cite> on everything in the model, all at once. Like <cite>explode()</cite> but for concept edges!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prune</strong> &#8211; Watson returns correlations for edges which it does not know enough about as 0.5,
+a lack of extensibility which can cause sizable issues: for example you might have both <cite>(0.5, IBM,
+Apple Inc.)</cite> and <cite>(0.5, IBM, Apple)</cite>. We as humans know that these are totally not equal comparisons,
+but the system does not! When this parameter is set to True (it is set to False by default) only edges with
+a correlation higher than 0.5 are added.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.get_view_count">
 <code class="descname">get_view_count</code><span class="sig-paren">(</span><em>concept</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.get_view_count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the <cite>view_count</cite> of a concept in the <cite>ConceptModel</cite>.
-:param concept: The concept supposedly in the <cite>ConceptModel</cite>.
-:return: The <cite>view_count</cite> int parameter of the concept, if it is found. Throws an error if it is not.</p>
+<dd><p>Returns the <cite>view_count</cite> of a concept in the <cite>ConceptModel</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>concept</strong> &#8211; The concept supposedly in the <cite>ConceptModel</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The <cite>view_count</cite> int parameter of the concept, if it is found. Throws an error if it is not.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.load_from_json">
 <code class="descname">load_from_json</code><span class="sig-paren">(</span><em>data_repr</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.load_from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a ConceptModel out of a JSON representation. Counter-operation to <cite>to_dict()</cite>.
-:param data_repr: The dictionary being passed to the method.
-:return: The generated ConceptModel.</p>
+<dd><p>Generates a ConceptModel out of a JSON representation. Counter-operation to <cite>to_dict()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_repr</strong> &#8211; The dictionary being passed to the method.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The generated ConceptModel.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.map_property">
 <code class="descname">map_property</code><span class="sig-paren">(</span><em>prop</em>, <em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.map_property" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps the <cite>param</cite> property of all of the concepts in the ConceptModel object by way of the user-provided <cite>func</cite>.
-:param prop: The parameter being given.
-:param func: The function that is called on the concept in order to determine the value of <cite>prop</cite>.</p>
+<dd><p>Maps the <cite>param</cite> property of all of the concepts in the ConceptModel object by way of the user-provided <cite>func</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prop</strong> &#8211; The parameter being given.</li>
+<li><strong>func</strong> &#8211; The function that is called on the concept in order to determine the value of <cite>prop</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.merge_with">
 <code class="descname">merge_with</code><span class="sig-paren">(</span><em>mixin_concept_model</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.merge_with" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges the given graph into the current one. The nx.compose method used here compares the hashes of the
-Concept objects being merged, and hashes are overwritten to map to labels.
-e.g. <cite>A = Concept(&#8216;IBM&#8217;)</cite> and <cite>B = Concept(&#8216;IBM&#8217;)</cite> have the same <cite>__hash__()</cite>, even though the objects are
-different, so they will merge into one when composed.
-:param mixin_concept_model &#8211; The <cite>ConceptModel</cite> object that is being folded into the current object.</p>
+Concept objects being merged, and hashes are overwritten to map to labels. e.g. <cite>A = Concept(&#8216;IBM&#8217;)</cite> and <cite>B =
+Concept(&#8216;IBM&#8217;)</cite> have the same <cite>__hash__()</cite>, even though the objects are different, so they will merge into
+one when composed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mixin_concept_model</strong> &#8211; The <cite>ConceptModel</cite> object that is being folded into the current object.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -255,45 +384,69 @@ different, so they will merge into one when composed.
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>concept</strong> &#8211; The concept that is the focus of this operation.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the &#8220;neighborhood&#8221; of a concept: a list of <cite>(correlation, concept)</cite> tuples pointing to/from
+it, plus itself. The neighborhood of the concept, a list of <cite>(concept, concept, relevance_edge)</cite> tuples
+much like the ones returned by <cite>edges()</cite> that contains every edge drawn from the chosen concept to any
+other in the graph. A concept is considered to be in a neighborhood with itself, with an auto-correlation
+of 1, so at a minimum expect to get back <cite>(lonely_concept, lonely_concept, 1)</cite>.</td>
 </tr>
 </tbody>
 </table>
-<p>Returns the &#8220;neighborhood&#8221; of a concept: a list of <cite>(correlation, concept)</cite> tuples pointing to/from it,
-plus itself. The neighborhood of the concept, a list of <cite>(concept, concept, relevance_edge)</cite> tuples much
-like the ones returned by <cite>edges()</cite> that contains every edge drawn from the chosen concept to any other in
-the graph. A concept is considered to be in a neighborhood with itself, with an auto-correlation of 1,
-so at a minimum expect to get back <cite>(lonely_concept, lonely_concept, 1)</cite>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.remove">
 <code class="descname">remove</code><span class="sig-paren">(</span><em>concept</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.remove" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes the given concept from the <cite>ConceptModel</cite>.
-:param concept: The concept being removed from the model.</p>
+<dd><p>Removes the given concept from the <cite>ConceptModel</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>concept</strong> &#8211; The concept being removed from the model.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.set_property">
 <code class="descname">set_property</code><span class="sig-paren">(</span><em>concept</em>, <em>param</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.set_property" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the <cite>param</cite> property of <cite>concept</cite> to <cite>value</cite>.
-:param concept: Concept being given a parameter.
-:param param: The parameter being given.
-:param value: The value the parameter being given takes on.</p>
+<dd><p>Sets the <cite>param</cite> property of <cite>concept</cite> to <cite>value</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>concept</strong> &#8211; Concept being given a parameter.</li>
+<li><strong>param</strong> &#8211; The parameter being given.</li>
+<li><strong>value</strong> &#8211; The value the parameter being given takes on.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.set_view_counts">
 <code class="descname">set_view_counts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.set_view_counts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes the <cite>view_count</cite> property for all of the Concept objects in the ConceptModel.</p>
+<dd><p>Initializes the <cite>view_count</cite> property for all of the concepts in the <cite>ConceptModel</cite>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="conceptmodel.ConceptModel.to_json">
 <code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#conceptmodel.ConceptModel.to_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the JSON representation of a ConceptModel. Counter-operation to <cite>load_from_dict()</cite>.
-:param self: A ConceptModel.
-:return: The nx dictionary representation of the ConceptModel.</p>
+<dd><p>Returns the JSON representation of a ConceptModel. Counter-operation to <cite>load_from_dict()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>self</strong> &#8211; A ConceptModel.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The nx dictionary representation of the ConceptModel.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -301,17 +454,24 @@ so at a minimum expect to get back <cite>(lonely_concept, lonely_concept, 1)</ci
 <span class="target" id="module-item"></span><dl class="class">
 <dt id="item.Item">
 <em class="property">class </em><code class="descclassname">item.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>name=''</em>, <em>description=''</em><span class="sig-paren">)</span><a class="headerlink" href="#item.Item" title="Permalink to this definition">¶</a></dt>
-<dd><p>The Item object is a generic container for the objects that the application is trying to recommend to its users.
-In the example application this class is extended by Event; it could also be extended by a class like Recipe,
-Talk, etc. In case you want to use Item as a standalone class (for experimentation or whatever else),
-JSON saving and loading binds are also provided for this class.</p>
+<dd><p>The Item object is a generic container for the objects that the application is trying to recommend to its users.</p>
 <dl class="method">
 <dt id="item.Item.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>name=''</em>, <em>description=''</em><span class="sig-paren">)</span><a class="headerlink" href="#item.Item.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads an <cite>Item</cite> object from its description and an associated name.
-:param name: The Item&#8217;s name.
-:param description: A textual description of what the Item is about or describes. This is mined at
-initialization for the concepts which are associated with this Item&#8217;s ConceptModel().</p>
+<dd><p>Loads an <cite>Item</cite> object from its description and an associated name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; The Item&#8217;s name.</li>
+<li><strong>description</strong> &#8211; A textual description of what the Item is about or describes. This is mined at
+initialization for the concepts which are associated with this Item&#8217;s ConceptModel().</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -330,15 +490,29 @@ initialization for the concepts which are associated with this Item&#8217;s Conc
 <dl class="method">
 <dt id="item.Item.load">
 <code class="descname">load</code><span class="sig-paren">(</span><em>filename='items.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#item.Item.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads the Item from a JSON representation.
-:param filename: The filename for the items storage file; <cite>items.json</cite> is the default.</p>
+<dd><p>Loads the Item from a JSON representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; The filename for the items storage file; <cite>items.json</cite> is the default.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="item.Item.load_from_json">
 <code class="descname">load_from_json</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#item.Item.load_from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads an Item from its JSON serialization. Counter-operation to <cite>to_json()</cite>.
-:param data: The JSON data being loaded into an Item object.</p>
+<dd><p>Loads an Item from its JSON serialization. Counter-operation to <cite>to_json()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; The JSON data being loaded into an Item object.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -357,26 +531,40 @@ initialization for the concepts which are associated with this Item&#8217;s Conc
 <dl class="method">
 <dt id="item.Item.save">
 <code class="descname">save</code><span class="sig-paren">(</span><em>filename='items.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#item.Item.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the Item to a JSON representation.
-:param filename: The filename for the items storage file; <cite>items.json</cite> is the default.</p>
+<dd><p>Saves the Item to a JSON representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; The filename for the items storage file; <cite>items.json</cite> is the default.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="item.Item.to_json">
 <code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#item.Item.to_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a JSON of the Item object suitable for storage. Counter-operation to <cite>load_from_json()</cite>.
-:return: A JSON serialization of the Item object which is suitable for storage.</p>
+<dd><p>Returns a JSON of the Item object suitable for storage. Counter-operation to <cite>load_from_json()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A JSON serialization of the Item object which is suitable for storage.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
 
 <span class="target" id="module-user"></span><dl class="class">
 <dt id="user.User">
-<em class="property">class </em><code class="descclassname">user.</code><code class="descname">User</code><span class="sig-paren">(</span><em>model=&lt;watsongraph.conceptmodel.ConceptModel object at 0x00000000043E7CC0&gt;</em>, <em>user_id=''</em>, <em>exceptions=None</em>, <em>password=''</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User" title="Permalink to this definition">¶</a></dt>
-<dd><p>The application&#8217;s User has their preferences stored in their own ConceptModel().</p>
+<em class="property">class </em><code class="descclassname">user.</code><code class="descname">User</code><span class="sig-paren">(</span><em>model=&lt;watsongraph.conceptmodel.ConceptModel object&gt;</em>, <em>user_id=''</em>, <em>exceptions=None</em>, <em>password=''</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module abstracts the application&#8217;s <cite>User</cite>, whose preferences are stored in their own <cite>ConceptModel</cite>.</p>
 <dl class="method">
 <dt id="user.User.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>model=&lt;watsongraph.conceptmodel.ConceptModel object at 0x00000000043E7CC0&gt;</em>, <em>user_id=''</em>, <em>exceptions=None</em>, <em>password=''</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>model=&lt;watsongraph.conceptmodel.ConceptModel object&gt;</em>, <em>user_id=''</em>, <em>exceptions=None</em>, <em>password=''</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -384,14 +572,13 @@ initialization for the concepts which are associated with this Item&#8217;s Conc
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>model</strong> &#8211; The ConceptModel() initially associated with the user. An empty one by default.</li>
 <li><strong>user_id</strong> &#8211; The id associated with the user. An empty string by default.</li>
-<li><strong>exceptions</strong> &#8211; The exceptions (items already viewed and either acted upon or passed on) associated with the</li>
+<li><strong>exceptions</strong> &#8211; The exceptions (items already viewed and either acted upon or passed on) associated with          the user.</li>
+<li><strong>password</strong> &#8211; The password associated with the user. An empty string by default.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>user.
-:param password: The password associated with the user. An empty string by default.</p>
 </dd></dl>
 
 <dl class="method">
@@ -410,58 +597,107 @@ initialization for the concepts which are associated with this Item&#8217;s Conc
 <dl class="method">
 <dt id="user.User.delete_user">
 <code class="descname">delete_user</code><span class="sig-paren">(</span><em>filename='accounts.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.delete_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a User object from the JSON entirely.
-:param filename: The filename for the account storage file; <cite>accounts.json</cite> is the default.</p>
+<dd><p>Deletes a User object from the JSON entirely.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; The filename for the account storage file; <cite>accounts.json</cite> is the default.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.express_disinterest">
 <code class="descname">express_disinterest</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.express_disinterest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges disinterest in an event into the user model. Adds the Item in which interest has been expressed to the
-exceptions.
-:param item: Event object the user is expressing disinterest in.</p>
+exceptions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; Event object the user is expressing disinterest in.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.express_interest">
 <code class="descname">express_interest</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.express_interest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges interest in an event into the user model. Adds the Item in which interest has been expressed to the
-exceptions.
-:param item: Event object the user is expressing interest in.</p>
+exceptions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; Event object the user is expressing interest in.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.get_best_item">
 <code class="descname">get_best_item</code><span class="sig-paren">(</span><em>item_list</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.get_best_item" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieves the event within a list of events which is most relevant to the given user&#8217;s interests.
-:param item_list: The list of Item objects to be examined.
-:return: The Item which best matches the user&#8217;s interests.</p>
+<dd><p>Retrieves the event within a list of events which is most relevant to the given user&#8217;s interests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item_list</strong> &#8211; The list of Item objects to be examined.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The Item which best matches the user&#8217;s interests.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.input_interest">
 <code class="descname">input_interest</code><span class="sig-paren">(</span><em>interest</em>, <em>level=0</em>, <em>limit=20</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.input_interest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resolves arbitrary user input to concepts, explodes the resultant nodes, and adds the resultant graph to the
-user&#8217;s present one.
-:param interest: Arbitrary user input.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+user&#8217;s present one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>interest</strong> &#8211; Arbitrary user input.</li>
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
 most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.</p>
+parameter is a parameter that is passed directly to the IBM Watson API call.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.input_interests">
 <code class="descname">input_interests</code><span class="sig-paren">(</span><em>interests</em>, <em>level=0</em>, <em>limit=20</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.input_interests" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resolves a series of arbitrary user inputs to concepts, explodes the resultant nodes, and adds the resultant
-graph to the user&#8217;s present one.
-:param interests: Arbitrary user input.
-:param level &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
+graph to the user&#8217;s present one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>interests</strong> &#8211; Arbitrary user input.</li>
+<li><strong>level</strong> &#8211; The limit placed on the depth of the graph. A limit of 0 is highest, corresponding with the
 most popular articles; a limit of 5 is the broadest and graphs to the widest cachet of articles. This
-parameter is a parameter that is passed directly to the IBM Watson API call.
-:param limit &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
-directly to the IBM Watson API call.</p>
+parameter is a parameter that is passed directly to the IBM Watson API call.</li>
+<li><strong>limit</strong> &#8211; a cutoff placed on the number of related concepts to be returned. This parameter is passed
+directly to the IBM Watson API call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -473,11 +709,11 @@ directly to the IBM Watson API call.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; An Item object to be compared to.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a float that rates this user&#8217;s hypothesized interest in the given event, based on the</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a float that rates this user&#8217;s hypothesized interest in the given event, based on the
+intersection between their own ConceptModel and that of the examined Event.</td>
 </tr>
 </tbody>
 </table>
-<p>intersection between their own ConceptModel and that of the examined Event.</p>
 </dd></dl>
 
 <dl class="method">
@@ -496,24 +732,48 @@ directly to the IBM Watson API call.</p>
 <dl class="method">
 <dt id="user.User.load_user">
 <code class="descname">load_user</code><span class="sig-paren">(</span><em>filename='accounts.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.load_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load a user from a JSON file.
-:param filename: The filename for the account storage file; <cite>accounts.json</cite> is the default.</p>
+<dd><p>Load a user from a JSON file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; The filename for the account storage file; <cite>accounts.json</cite> is the default.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.save_user">
 <code class="descname">save_user</code><span class="sig-paren">(</span><em>filename='accounts.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.save_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves a user to a JSON file.
-:param self: The user to be saved to JSON.
-:param filename: The filename for the account storage file; <cite>accounts.json</cite> is the default.</p>
+<dd><p>Saves a user to a JSON file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>self</strong> &#8211; The user to be saved to JSON.</li>
+<li><strong>filename</strong> &#8211; The filename for the account storage file; <cite>accounts.json</cite> is the default.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="user.User.update_user_credentials">
 <code class="descname">update_user_credentials</code><span class="sig-paren">(</span><em>filename='accounts.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#user.User.update_user_credentials" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates User information in the JSON. This is a seperate method in order to account for password and id
-manipulation (otherwise <cite>save_user()</cite> alone works fine).
-:param filename: The filename for the account storage file; <cite>accounts.json</cite> is the default.</p>
+manipulation (otherwise <cite>save_user()</cite> alone works fine).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; The filename for the account storage file; <cite>accounts.json</cite> is the default.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

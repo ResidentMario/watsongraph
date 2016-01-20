@@ -26,7 +26,6 @@ Contents:
 .. autoclass:: User
     :members: __init__, concepts, interests, interest_in, get_best_item, express_interest, express_disinterest, input_interest, input_interests, save_user, load_user, update_user_credentials, delete_user
 
-
 Indices and tables
 ==================
 
