@@ -26,7 +26,8 @@ class ConceptModel:
     def __init__(self, list_of_concepts=None):
         """
         Initializes the ConceptModel using a list of raw concepts.
-        :param list_of_concepts: A list of concept labels (eg. ['Microsoft', 'IBM']) to initialize the model around.
+        :param list_of_concepts: A list of concept labels (eg. ['Microsoft', 'IBM'] or ['Apple Inc.']) to initialize
+        the model around.
         """
         # Initialize the model graph object.
         self.graph = nx.Graph()
@@ -42,21 +43,21 @@ class ConceptModel:
     # Setters, getters, and printers. #
     ###################################
 
-    def print_edges(self):
-        """
-        Edge pretty-printing method that's useful for debugging.
-        """
-        sorted_edge_tuples = sorted([(self.graph.edge[edge[0]][edge[1]]['weight'], edge[0], edge[1]) for edge in
-                                     self.graph.edges()], reverse=True)
-        for index, edge_repr in enumerate(sorted_edge_tuples):
-            print(str(index), edge_repr[1].concept + ' <- ' + str(edge_repr[0]) + ' -> ' + edge_repr[2].concept)
-
-    def print_concepts(self):
-        """
-        Node pretty-printing method that's useful for debugging.
-        """
-        for index, node in enumerate(self.nodes()):
-            print(index, node.concept)
+    # def print_edges(self):
+    #     """
+    #     Edge pretty-printing method that's useful for debugging.
+    #     """
+    #     sorted_edge_tuples = sorted([(self.graph.edge[edge[0]][edge[1]]['weight'], edge[0], edge[1]) for edge in
+    #                                  self.graph.edges()], reverse=True)
+    #     for index, edge_repr in enumerate(sorted_edge_tuples):
+    #         print(str(index), edge_repr[1].concept + ' <- ' + str(edge_repr[0]) + ' -> ' + edge_repr[2].concept)
+    #
+    # def print_concepts(self):
+    #     """
+    #     Node pretty-printing method that's useful for debugging.
+    #     """
+    #     for index, node in enumerate(self.nodes()):
+    #         print(index, node.concept)
 
     def nodes(self):
         """
@@ -72,8 +73,7 @@ class ConceptModel:
 
     def edges(self):
         """
-        :return: Returns a list of all of the (concept, other concept, strength) tuples in the ConceptModel. See
-        also `print_edges()` and `self.graph.edges()`.
+        :return: Returns a list of all (concept, other concept, strength) tuples in the ConceptModel.
         """
         return sorted([(self.graph[edge[0]][edge[1]]['weight'], edge[0].concept, edge[1].concept) for edge in
                        self.graph.edges()], reverse=True)
@@ -91,17 +91,21 @@ class ConceptModel:
 
     def remove(self, concept):
         """
-        Removes the given concept from the ConceptModel.
+        Removes the given concept from the `ConceptModel`.
         :param concept: The concept being removed from the model.
         """
         self.graph.remove_node(self.get_node(concept))
 
     def neighborhood(self, concept):
         """
-        Returns the "neighborhood" of a concept: a list of (correlation, concept) tuples pointing to/from it,
-        plus itself (a concept has a self-correlation of 1!).
-        :param concept: The concept to focus in on.
-        :return: The neighborhood, represented by a list of edge much like the one returned by `edges()`.
+        :param concept: The concept that is the focus of this operation.
+        :return:
+
+        Returns the "neighborhood" of a concept: a list of `(correlation, concept)` tuples pointing to/from it,
+        plus itself. The neighborhood of the concept, a list of `(concept, concept, relevance_edge)` tuples much
+        like the ones returned by `edges()` that contains every edge drawn from the chosen concept to any other in
+        the graph. A concept is considered to be in a neighborhood with itself, with an auto-correlation of 1,
+        so at a minimum expect to get back `(lonely_concept, lonely_concept, 1)`.
         """
         return sorted([(1, concept)] + [(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
                                         self.graph.neighbors(self.get_node(concept))], reverse=True)
@@ -112,22 +116,24 @@ class ConceptModel:
 
     def concepts_by_property(self, prop):
         """
-        :param prop: The property to sort the returned output by.
-        :return: Returns a list of `(prop, concept)` tuples sorted by prop.
+        :param prop: The `property` to sort the returned output by.
+        :return:
+
+        Returns a list of `(prop, concept)` tuples sorted by prop. Note that this method will fail if this property
+        is not initialized for all concepts.
         """
         return sorted([(node.get_property(prop), node.concept) for node in self.nodes()], reverse=True)
 
     def concepts_by_view_count(self):
         """
-        Wrapper for `concepts_by_property(prop)` for the `view_count` case.
+        Wrapper for `concepts_by_property()` for the `view_count` case.
         :return: Returns a list of `(view_count, concept)` tuples sorted by `view_count`.
         """
         return self.concepts_by_property('view_count')
 
     def set_view_counts(self):
         """
-        Initializes the view counts for all of the Concept objects in the ConceptModel. See Concept for a
-        description of why this parameter is optional.
+        Initializes the `view_count` property for all of the Concept objects in the ConceptModel.
         """
         for node in self.nodes():
             p = PageviewsClient().article_views("en.wikipedia", [node.concept.replace(' ', '_')])
@@ -176,9 +182,9 @@ class ConceptModel:
         """
         Merges the given graph into the current one. The nx.compose method used here compares the hashes of the
         Concept objects being merged, and hashes are overwritten to map to labels.
-        e.g. A = Concept('IBM') and B = Concept('IBM') have the same __hash__(), even though the objects are
+        e.g. `A = Concept('IBM')` and `B = Concept('IBM')` have the same `__hash__()`, even though the objects are
         different, so they will merge into one when composed.
-        :param mixin_concept_model -- The ConceptModel object that is being folded into the current object.
+        :param mixin_concept_model -- The `ConceptModel` object that is being folded into the current object.
         """
         self.graph = nx.compose(self.graph, mixin_concept_model.graph)
 
