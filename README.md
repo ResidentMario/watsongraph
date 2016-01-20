@@ -39,6 +39,10 @@ the aforementioned `concept_insight_credentials.json`. Your credentials should l
 Note that outside of the thirty-day trial IBM Watson is a paid service, but for experimental purposes the monthly free
 allotment (25,000 queries) is more than enough.
 
+## Documentation
+
+This library's Sphinx documentation is available on [Read The Docs](http://watsongraph.readthedocs.org/en/latest/).
+
 ## Examples
 
 ### Concept mapping
