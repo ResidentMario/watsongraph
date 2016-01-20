@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # watsongraph documentation build configuration file, created by
-# sphinx-quickstart on Tue Jan 12 23:21:45 2016.
+# sphinx-quickstart on Tue Jan 19 17:56:01 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -15,8 +15,8 @@
 
 import sys
 import os
-import shlex
-from recommonmark.parser import CommonMarkParser
+
+sys.path.insert(0, "C:\Users\Alex\Desktop\watson-graph\watsongraph")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -31,21 +31,17 @@ from recommonmark.parser import CommonMarkParser
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-sys.path.append(os.path.abspath('sphinx.ext.autodoc'))
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# Source parsers...
-source_parsers = {
-    '.md': CommonMarkParser,
-}
-
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
-source_suffix = ['.rst', '.md']
+source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -230,8 +226,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'watsongraph.tex', 'watsongraph Documentation',
-   'Aleksey Bilogur', 'manual'),
+    (master_doc, 'watsongraph.tex', 'watsongraph Documentation',
+     'Aleksey Bilogur', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -274,9 +270,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'watsongraph', 'watsongraph Documentation',
-   author, 'watsongraph', 'One line description of project.',
-   'Miscellaneous'),
+    (master_doc, 'watsongraph', 'watsongraph Documentation',
+     author, 'watsongraph', 'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
