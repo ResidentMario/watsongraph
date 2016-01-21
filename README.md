@@ -73,11 +73,11 @@ True
 
 ```
 
-The [ConceptModel demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
+The [ConceptModel demo notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Modeling.ipynb)
 provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here.
 
 
-The [Advanced Concept Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
+The [Advanced Concept Modeling demo notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
 provides a detailed walkthrough of advanced `ConceptModel` features as well as recommendations about how to use them
 for modelling. To learn more about how best to apply this library, go here (but read the above first!).
 
@@ -104,7 +104,7 @@ For example:
 >>> Bob.express_interest(meetup)
 ```
 
-To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations.ipynb)
+To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations.ipynb)
 in this repository.
 
 For further inspiration you can also try out IBM's own
