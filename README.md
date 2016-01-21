@@ -1,3 +1,7 @@
+[![Documentation Status](https://readthedocs.org/projects/watsongraph/badge/?version=latest)](http://watsongraph.readthedocs.org/en/latest/?badge=latest)
+[![PyPi version](https://img.shields.io/pypi/v/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
+[![PyPi downloads](https://img.shields.io/pypi/dm/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
+
 # watsongraph
 `watsongraph` is a Pythonic concept graphing and recommendation library.
 The library's core `ConceptModel` objects is constructed out of the individual concept nodes which are associated with
@@ -38,6 +42,10 @@ the aforementioned `concept_insight_credentials.json`. Your credentials should l
 
 Note that outside of the thirty-day trial IBM Watson is a paid service, but for experimental purposes the monthly free
 allotment (25,000 queries) is more than enough.
+
+## Documentation
+
+This library's Sphinx documentation is available on [Read The Docs](http://watsongraph.readthedocs.org/en/latest/).
 
 ## Examples
 
