@@ -3,62 +3,11 @@
 [![PyPi downloads](https://img.shields.io/pypi/dm/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
 
 # watsongraph
-`watsongraph` is a Pythonic concept graphing and recommendation library.
-The library's core `ConceptModel` objects is constructed out of the individual concept nodes which are associated with
-labels from the IBM Watson `wikipedia/en-20120601` cognitive graph, queried using the
-[Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html) and
-reconstructed locally as a [networkx](https://networkx.github.io/)-based weighted conceptual graph.
-
-Each node in the `ConceptModel` is mapped to a corresponding unique Wikipedia page, and nodes are in turn connected
-to another by "relevance edges" (in range the range 0 to 1, a probabilistic scale). This `ConceptModel` can then be
-associated with any number of applications. Basic bindings are provided, in particular, for a recommendation service
-using library-provided `Item` and `User` classes.
-
-This code is `Python 3`-only for the moment.
-
-## Setup
-
-`watsongraph` is [available on PyPi](https://pypi.python.org/pypi/watsongraph/): to get it simply call `pip install
- watsongraph`.
-
-However, in order to use the IBM Watson cognitive APIs you **must** register for it on Bluemix first. In particular,
-once you have the code locally, you will need to create a `concept_insight_credentials.json` file
-containing your [IBM Bluemix](https://console.ng.bluemix.net/) access credentials. If you do not have an account
-already you may [register](https://console.ng.bluemix.net/registration/) for a free trial account. Once you are
-logged in, enter the catalog, scroll down to the "IBM Watson" section, and click through to create an instance of the
-"Concept Insights" service. Go back to the dashboard, click on the newly populated service, and click through to
-"Service Credentials" on the sidebar to get your service credentials: copy-paste this file and save it locally as
-the aforementioned `concept_insight_credentials.json`. Your credentials should look something like this:
-
-```
-{
-  "credentials": {
-    "url": "https://gateway.watsonplatform.net/concept-insights/api",
-    "username": "........-....-....-....-............",
-    "password": "............"
-  }
-}
-```
-
-Note that outside of the thirty-day trial IBM Watson is a paid service, but for experimental purposes the monthly free
-allotment (25,000 queries) is more than enough.
-
-## Documentation
-
-This library's Sphinx documentation is available on [Read The Docs](http://watsongraph.readthedocs.org/en/latest/).
-
-## Examples
-
-### Concept mapping
-
-One way to explore Wikipedia articles (one that has been used pretty exhaustively in the research space) is to crawl
-it for links, performing operations of interest on particular articles and then jumping along to the next batch of
-links that that page turns up. This library allows for an interesting alternative possibility: exploring Wikipedia
-based on topical connections between articles generated not by "dumb" links between pages, but instead by "smart"
-learned relationships observed by IBM Watson, perhaps (probably?) the most powerful machine learning system in
-development today.
-
-For example:
+`watsongraph` is a concept discovery, graphing, and processing library written in `Python 3`. The library's
+core facility is the `ConceptModel` object, a conceptual graph constructed out of the individual concept nodes
+associated with labels from the IBM Watson `wikipedia/en-20120601` Wikipedia-derived conceptual graph. This graph is
+queried using the [Concept Insights API](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html)
+and then reconstructed locally as a `networkx`-based weighted conceptual graph:
 
 ```
 >>> from watsongraph.conceptmodel import ConceptModel
@@ -81,21 +30,8 @@ True
 
 ```
 
-The [ConceptModel demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Mapping%20Demo.ipynb)
-provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here.
-
-
-The [Advanced Concept Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
-provides a detailed walkthrough of advanced `ConceptModel` features as well as recommendations about how to use them
-for modelling. To learn more about how best to apply this library, go here (but read the above first!).
-
-### User modeling
-
-This library provides basic but durable and highly extendible facilities for constructing an IBM Watson Cognitive
-Insights -based user recommendation service. The two classes of interest provided here are `User` and `Item`.
-`ConceptModel` objects are implicit in both of these classes but have been abstracted away from.
-
-For example:
+The `ConceptModel` can then be associated with any number of applications. Basic bindings are provided, in
+particular, for a recommendation service using library-provided `Item` and `User` classes:
 
 ```
 >>> from watsongraph.user import User
@@ -112,8 +48,75 @@ For example:
 >>> Bob.express_interest(meetup)
 ```
 
-To learn how to apply this library to user modeling see the [Recommendations Modeling demo notebook](https://github.com/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations.ipynb)
-in this repository.
+## Setup
 
-For further inspiration you can also try out IBM's own
+`watsongraph` is [available on PyPi](https://pypi.python.org/pypi/watsongraph/) and can be downloaded locally with `pip
+install watsongraph`.
+
+However, in order to use IBM Watson cognitive APIs you **must** first register an account on
+[IBM Bluemix](https://console.ng.bluemix.net/). If you do not
+have an account already you may [register](https://console.ng.bluemix.net/registration/) for a free trial account.
+
+Once you are logged in, enter the catalog, scroll down to the "IBM Watson" section, and click through to create an
+instance of the
+[Concept Insights](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html) service. Go
+ back to the dashboard, click on the newly populated service, and click through to "Service Credentials" on the
+ sidebar to get your service credentials: copy-paste this `json` output and save it locally as
+ `concept_insight_credentials.json`. Your credentials should look like this:
+
+```
+{
+  "credentials": {
+    "url": "https://gateway.watsonplatform.net/concept-insights/api",
+    "username": "........-....-....-....-............",
+    "password": "............"
+  }
+}
+```
+
+Account access is provided on a thirty-day free trial basis by default, however there is free monthly allotment
+(25,000 queries), more than enough for experimental purposes.
+
+## Documentation and examples
+
+* The [ConceptModel Jupyter notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Modeling.ipynb)
+provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here.
+* The [Advanced Concept Modeling Jupyter notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
+provides a detailed walkthrough of advanced `ConceptModel` features as well as recommendations about how to use them
+for modeling.
+* The [Recommendations Modeling Jupyter notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Recommendations.ipynb)
+applies `watsongraph` to user recommendation modeling.
+* The [Sphinx documentation](http://watsongraph.readthedocs.org/en/latest/) is the reference manual for all
+`watsongraph` methods.
+* The [Fortune 50 force visualization](http://bl.ocks.org/ResidentMario/793fe40d743b98d05dea) is a visualization of
+the sort of network that you can construct with `watsongraph`.
+* I also visualized [my 30 most edited Wikipedia articles visualization](http://bl.ocks.org/ResidentMario/2fcabfdc3e5a45b07edf)
+as a further visual reference on the same.
+* For further inspiration you can also try out IBM's own
 [example application](https://concept-insights-demo.mybluemix.net/) (which predates this library).
+* For further inspiration you can also try out my [Cultural Insight webapp](https://github.com/ResidentMario/cultural-insight)
+(which similarly predates this library).
+
+## Contributing
+
+The `watsongraph` library is currently in its first stable release, so it is still in a fairly early state of
+development: there are quite a large number of improvements and new features which could potentially be made. At the
+moment I am waiting for work to finish on the [Watson Developer Cloud Python SDK](https://github.com/watson-developer-cloud/python-sdk)
+so that  I can make a large volume of low-level architectural improvements (and add a few new features) for the next
+planned stable release, `0.3.0`. You can see the milestone composite issues in this repository's
+[issue tracker](https://github.com/ResidentMario/watsongraph/issues?q=is%3Aopen+is%3Aissue+milestone%3A0.3.0).
+
+To pull the latest build onto your development machine, [clone](https://help.github.com/articles/cloning-a-repository/) this repository
+(`git clone https://github.com/ResidentMario/cultural-insight.git`) and follow the instructions in [setup](#Setup) to
+populate your access credentials.
+
+To submit a minor fix just submit a [pull request](https://help.github.com/articles/using-pull-requests/). Be sure
+to explain what problem your change addresses!
+
+If you are interested in contributing new features or major enhancements, we should talk! You can submit an [issue](https://guides.github.com/features/issues/)
+or [pull request](https://help.github.com/articles/using-pull-requests/) summarizing the work using the "Enhancement"
+ label. You can also [filter](https://github.com/ResidentMario/watsongraph/labels/enhancement)
+to enhancements to see what's already on the radar.
+
+I am very receptive to feedback and would defintely like to see this code reviewed by others, you can reach out to me
+at `aleksey@residentmar.io`.
