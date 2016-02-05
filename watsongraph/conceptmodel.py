@@ -47,22 +47,6 @@ class ConceptModel:
     # Setters, getters, and printers. #
     ###################################
 
-    # def print_edges(self):
-    #     """
-    #     Edge pretty-printing method that's useful for debugging.
-    #     """
-    #     sorted_edge_tuples = sorted([(self.graph.edge[edge[0]][edge[1]]['weight'], edge[0], edge[1]) for edge in
-    #                                  self.graph.edges()], reverse=True)
-    #     for index, edge_repr in enumerate(sorted_edge_tuples):
-    #         print(str(index), edge_repr[1].concept + ' <- ' + str(edge_repr[0]) + ' -> ' + edge_repr[2].concept)
-    #
-    # def print_concepts(self):
-    #     """
-    #     Node pretty-printing method that's useful for debugging.
-    #     """
-    #     for index, node in enumerate(self.nodes()):
-    #         print(index, node.concept)
-
     def nodes(self):
         """
         :return: Returns a list of all of the `Node` objects in the `ConceptModel`.
@@ -109,11 +93,13 @@ class ConceptModel:
         :return: Returns the "neighborhood" of a concept: a list of `(correlation, concept)` tuples pointing to/from
          it, plus itself. The neighborhood of the concept, a list of `(concept, concept, relevance_edge)` tuples
          much like the ones returned by `edges()` that contains every edge drawn from the chosen concept to any
-         other in the graph. A concept is considered to be in a neighborhood with itself, with an auto-correlation
-         of 1, so at a minimum expect to get back `(lonely_concept, lonely_concept, 1)`.
+         other in the graph.
+
+         Note that graph theoretic convention does not consider a node to be a neighbor to itself. Thus the
+         relevance tuple `(1, same_concept, same_concept)` is not included in output.
         """
-        return sorted([(1, concept)] + [(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
-                                        self.graph.neighbors(self.get_node(concept))], reverse=True)
+        return sorted([(self.graph[self.get_node(concept)][node]['weight'], node.concept) for node in
+                       self.graph.neighbors(self.get_node(concept))], reverse=True)
 
     ######################
     # Parameter methods. #
