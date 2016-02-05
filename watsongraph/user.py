@@ -52,7 +52,8 @@ class User:
         """
         :return: Returns (interest, concept) pair tuples associated with the user.
         """
-        return sorted([(node.get_relevance(), node.concept) for node in self.model.nodes()], reverse=True)
+        return sorted([("{0:.3f}".format(node.get_relevance()), node.concept) for node in self.model.nodes()],
+                      reverse=True)
 
     def interest_in(self, item):
         """

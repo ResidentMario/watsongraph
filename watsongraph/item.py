@@ -53,7 +53,8 @@ class Item:
         """
         :return: Sorted (relevance, concept) pairs associated with the Item.
         """
-        return sorted([(node.properties['relevance'], node.concept) for node in self.nodes()], reverse=True)
+        return sorted([("{0:.3f}".format(node.properties['relevance']), node.concept) for node in self.nodes()],
+                      reverse=True)
 
     def to_json(self):
         """

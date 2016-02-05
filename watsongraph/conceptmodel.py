@@ -64,8 +64,8 @@ class ConceptModel:
         """
         :return: Returns a list of all `(concept, other concept, strength)` tuples in the `ConceptModel`.
         """
-        return sorted([(self.graph[edge[0]][edge[1]]['weight'], edge[0].concept, edge[1].concept) for edge in
-                       self.graph.edges()], reverse=True)
+        return sorted([("{0:.3f}".format(self.graph[edge[0]][edge[1]]['weight']), edge[0].concept, edge[1].concept)
+                       for edge in self.graph.edges()], reverse=True)
 
     def get_node(self, concept):
         """
