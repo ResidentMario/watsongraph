@@ -330,12 +330,26 @@ class ConceptModel:
         raw_scores = watsongraph.event_insight_lib.get_relation_scores(source_concept, list_of_target_concepts)
         mixin_graph = nx.Graph()
         mixin_source_node = Node(source_concept)
+        own_concepts = self.concepts()
         for raw_concept in raw_scores['scores']:
-            raw_concept['concept'] = raw_concept['concept'].replace('_', ' ')
+            # Check that we pass relevance.
             if not prune or (prune and raw_concept['score'] > 0.5):
+                # Parse the returned nodal concept text into the concept: ".../Watson_(computer)"->"Watson (computer)".
+                raw_concept['concept'] = raw_concept['concept'].replace('_', ' ')
                 mixin_concept = raw_concept['concept'][raw_concept['concept'].rfind('/') + 1:]
+                # We want to keep our graphs simple, so explicitly avoid concept-to-concept loops. Why is the user
+                # asking for something like that anyway?
                 if mixin_concept != source_concept:
                     mixin_target_node = Node(mixin_concept)
+                    # We might want to be examining the relationship between two nodes that are already in the model.
+                    # For example, we might call `ibm = ConceptModel(['IBM', 'Watson (computer)]); ibm.explode_edges()`.
+                    # In this case `nx.compose` will override the existing Node with our new Node. But what if our
+                    # old Node had properties assigned to it? Then these properties are deleted!
+                    # To account for this subtlety we check to see if mixin_concept is already in the model, and,
+                    # if it is, we explicitly attach its properties to the new Node it will be overwritten by.
+                    if mixin_concept in own_concepts:
+                        mixin_target_node.properties = self.get_node(mixin_concept).properties
+                    # Note that this is the `nx.add_edge()` method, not the `conceptmodel.add_edge()` one.
                     mixin_graph.add_edge(mixin_source_node, mixin_target_node, weight=raw_concept['score'])
         self.graph = nx.compose(self.graph, mixin_graph)
 
