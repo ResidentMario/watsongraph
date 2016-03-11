@@ -79,8 +79,12 @@ Account access is provided on a thirty-day free trial basis by default, however 
 
 ## Documentation and examples
 
+* "[Exploring the IBM Watson Concept Insights service using watsongraph](http://www.residentmar.io/2016/02/11/watsongraph-visualization.html)"
+is a blog post on my personal website which explores the capacities and use cases for the `watsongraph` library. If
+you are curious about how it works, the visualizations here are the best place to start!
 * The [ConceptModel Jupyter notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Concept%20Modeling.ipynb)
-provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here.
+provides a detailed walkthrough of basic `ConceptModel` operations. To learn how to use this library, start here,
+then move on to the two notebooks below.
 * The [Advanced Concept Modeling Jupyter notebook](http://nbviewer.jupyter.org/github/ResidentMario/watsongraph/blob/master/watsongraph%20-%20Advanced%20Concept%20Modeling.ipynb)
 provides a detailed walkthrough of advanced `ConceptModel` features as well as recommendations about how to use them
 for modeling.
@@ -88,14 +92,8 @@ for modeling.
 applies `watsongraph` to user recommendation modeling.
 * The [Sphinx documentation](http://watsongraph.readthedocs.org/en/latest/) is the reference manual for all
 `watsongraph` methods.
-* The [Fortune 50 force visualization](http://bl.ocks.org/ResidentMario/793fe40d743b98d05dea) is a visualization of
-the sort of network that you can construct with `watsongraph`.
-* I also visualized [my 30 most edited Wikipedia articles visualization](http://bl.ocks.org/ResidentMario/2fcabfdc3e5a45b07edf)
-as a further visual reference on the same.
 * For further inspiration you can also try out IBM's own
 [example application](https://concept-insights-demo.mybluemix.net/) (which predates this library).
-* For further inspiration you can also try out my [Cultural Insight webapp](https://github.com/ResidentMario/cultural-insight)
-(which similarly predates this library).
 
 ## Contributing
 
