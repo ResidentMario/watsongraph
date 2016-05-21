@@ -1,6 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/watsongraph/badge/?version=latest)](http://watsongraph.readthedocs.org/en/latest/?badge=latest)
 [![PyPi version](https://img.shields.io/pypi/v/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
-[![PyPi downloads](https://img.shields.io/pypi/dm/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
 
 # watsongraph
 `watsongraph` is a concept discovery, graphing, and processing library written in `Python 3`. The library's
