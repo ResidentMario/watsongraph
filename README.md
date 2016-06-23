@@ -2,6 +2,9 @@
 [![PyPi version](https://img.shields.io/pypi/v/watsongraph.svg)](https://pypi.python.org/pypi/watsongraph/)
 
 # watsongraph
+
+![Watsongraph Visualization](http://i.imgur.com/M1sahoT.png "Watsongraph Visualization")
+
 `watsongraph` is a concept discovery, graphing, and processing library written in `Python 3`. The library's
 core facility is the `ConceptModel` object, a conceptual graph constructed out of the individual concept nodes
 associated with labels from the IBM Watson `wikipedia/en-20120601` Wikipedia-derived conceptual graph. This graph is
